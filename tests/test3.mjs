@@ -1,3 +1,5 @@
+process.env.GMAIL_USER="t@gmail.com";process.env.GMAIL_APP_PASSWORD="abcd efgh ijkl mnop";
+import nm from "nodemailer";const CODE=()=>/(\d{6})/.exec(nm.__sent.at(-1).text)[1];
 import crypto from "node:crypto";
 process.env.PAYSTACK_SECRET_KEY="sk_test_x";process.env.ADMIN_EMAILS="admin@x.com";
 import h from "./api.mjs";
@@ -11,11 +13,11 @@ globalThis.fetch=async(u,o={})=>{const b=o.body?JSON.parse(o.body):{};const J=(x
  if(u.endsWith("/transfer")){transfers.push(b);return J({status:true,data:{reference:b.reference}})}
  return J({result:"fail"})};
 const call=async(m,p,b,tok)=>{const r=await h(new Request("http://x/api"+p,{method:m,headers:{"content-type":"application/json",...(tok?{authorization:"Bearer "+tok}:{})},body:b?JSON.stringify(b):undefined}));return r.json()};
-const signup=async(e,country)=>{const o=await call("POST","/otp",{email:e});const v=await call("POST","/verify",{email:e,code:o.demo_code,country});return v.token};
+const signup=async(e,country)=>{const o=await call("POST","/otp",{email:e});const v=await call("POST","/verify",{email:e,code:CODE(),country});return v.token};
 const V=await signup("v@x.com","NG"),C=await signup("c@x.com","NG"),A=await signup("admin@x.com","NG"),G=await signup("gh@x.com","GH");
-ok((await call("POST","/otp",{email:"v@x.com"})).demo_code&&(await call("POST","/verify",{email:"v@x.com",code:"1"})).error,"wrong code rejected");
+ok((await call("POST","/otp",{email:"v@x.com"})).email_sent&&(await call("POST","/verify",{email:"v@x.com",code:"1"})).error,"wrong code rejected");
 const re=await signup("v@x.com","NG");ok(re,"returning sign-in works");
-const nu=await call("POST","/otp",{email:"new@x.com"});const nv=await call("POST","/verify",{email:"new@x.com",code:nu.demo_code});ok(nv.is_new===true,"is_new flag");
+const nu=await call("POST","/otp",{email:"new@x.com"});const nv=await call("POST","/verify",{email:"new@x.com",code:CODE()});ok(nv.is_new===true,"is_new flag");
 await call("POST","/bond/account",{account_number:"0123456789",bank_code:"058"},V);
 const of=(await call("POST","/offers",{provide:"USD",want:"NGN",rate:1500,min:10,max:100,vendor:"Zed • ★new • 0 trades"},V)).offer;
 const hook=async ev=>{const raw=JSON.stringify(ev);const s=crypto.createHmac("sha512","sk_test_x").update(raw).digest("hex");return (await h(new Request("http://x/api/paystack/webhook",{method:"POST",headers:{"x-paystack-signature":s},body:raw}))).status};

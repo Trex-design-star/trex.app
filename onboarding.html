@@ -6,6 +6,7 @@
 <title>Trex — Create account</title>
 <script src="js/trex.js"></script>
 <script src="js/api.js"></script>
+<script src="js/liveness.js"></script>
 <style>
   :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
     --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;
@@ -92,9 +93,8 @@
     <p class="muted">A quick liveness check confirms a real person is present — it is not full ID verification. Your name must match your bank account later.</p>
     <label>Full name</label>
     <input id="fullName" placeholder="e.g. Adaeze Okafor" />
-    <label>Liveness check</label>
-    <input type="file" accept="image/*" capture="user" id="selfie" />
-    <p class="muted">On this device your camera opens with positioning and lighting guidance. Here, choose a photo to continue.</p>
+    <label>Face check</label>
+    <div id="liveHost"></div>
     <label>App PIN (4 digits)</label>
     <input id="pin" maxlength="4" inputmode="numeric" placeholder="••••" />
     <label><input type="checkbox" id="bio" style="width:auto"> Unlock with fingerprint or face on this device</label>
@@ -201,9 +201,11 @@ $("verifyEmail").onclick=function(){
   if(code===emailSent&&emailSent){ emailOK(); }
   else $("emailErr").textContent="That code doesn't match. Try again.";
 };
+if(apiOn()) Liveness.start($("liveHost"));
 $("finishPersonal").onclick=function(){
   if(!$("fullName").value||$("pin").value.length!==4){ alert("Add your name and a 4-digit PIN."); return; }
-  try{localStorage.setItem("trex_name",$("fullName").value);}catch(e){} try{ var v=TREX.load("trex_verify",{}); v.email=true;v.liveness=!!$("selfie").value;v.pin=true; TREX.store("trex_verify",v); }catch(e){}
+  if(apiOn()&&!window._liveDone){ alert("Please complete the face check first."); return; }
+  try{localStorage.setItem("trex_name",$("fullName").value);}catch(e){} try{ var v=TREX.load("trex_verify",{}); v.email=true;v.liveness=!!window._liveDone;v.pin=true; TREX.store("trex_verify",v); }catch(e){}
   $("d3").className="step-dot done"; $("d4").className="step-dot on";
   var p0=prof(); fillCurs($("limitCur"),p0.localCurrency||"NGN"); bondText();
   show("s4");

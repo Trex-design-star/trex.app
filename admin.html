@@ -221,6 +221,13 @@ function paintDisputes(){
         var b=document.createElement("button"); b.className="btn btn-blue"; b.textContent="Approve payout"; b.onclick=function(){ fetch("/api/bond/approve",{method:"POST",headers:liveH(),body:JSON.stringify({ref:p.ref})}).then(function(y){return y.json();}).then(function(y){ if(!y.ok)alert(y.error); paintDisputes(); }); };
         el.appendChild(b); box.appendChild(el); });
     });
+    fetch("/api/liveness/flags",{headers:liveH()}).then(function(x){return x.json();}).then(function(x){
+      if(!x.ok||!x.flags.length) return;
+      var h=document.createElement("div"); h.innerHTML="<b>Accounts flagged for a possible duplicate face</b>"; box.appendChild(h);
+      x.flags.forEach(function(p){ var el=document.createElement("div"); el.className="item"; el.innerHTML="<div class='mono'>"+esc(p.email)+" looks like "+esc(p.match)+"</div>";
+        var b=document.createElement("button"); b.className="btn btn-blue"; b.textContent="Clear — different person"; b.onclick=function(){ fetch("/api/liveness/clear",{method:"POST",headers:liveH(),body:JSON.stringify({email:p.email})}).then(function(){ paintDisputes(); }); };
+        el.appendChild(b); box.appendChild(el); });
+    });
   }).catch(function(){ paintDisputesLocal(); });
 }
 function paintVendors(){

@@ -151,9 +151,19 @@ async function lockPending(em) {
 const CONTACT = /(\+?\d[\d\s().-]{7,}\d)|whats\s*app|telegram|signal|wa\.me|t\.me|instagram|facebook|snap\s*chat|@[a-z0-9_.]{3,}|[a-z0-9._-]+@[a-z0-9-]+\.[a-z]{2,}/i;
 async function audit(e) { const l = await rd("audit", []); l.push({ at: now(), event: e }); await wr("audit", l.slice(-200)); }
 
+let _smtp = null, _smtpKey = "";
 async function email(to, subject, text) {
+  if (!to) return { sent: false, reason: "no-key" };
+  const gu = process.env.GMAIL_USER || "", gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
+  if (gu && gp) {
+    try {
+      if (!_smtp || _smtpKey !== gu + gp) { _smtpKey = gu + gp; const nm = await import("nodemailer"); const N = nm.default || nm; _smtp = N.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: gu, pass: gp } }); }
+      await _smtp.sendMail({ from: `"Trex" <${gu}>`, to, subject, text });
+      return { sent: true };
+    } catch (e) { _smtp = null; return { sent: false, reason: "error" }; }
+  }
   const key = process.env.RESEND_API_KEY || "";
-  if (!key || !to) return { sent: false, reason: "no-key" };
+  if (!key) return { sent: false, reason: "no-key" };
   try {
     const r = await fetch("https://api.resend.com/emails", { method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -191,7 +201,7 @@ async function handle(req) {
   if (M === "POST") { raw = await req.text(); try { body = JSON.parse(raw); } catch { body = {}; } }
   const me = await authOf(req);
   try {
-    if (M === "GET" && route === "health") return out({ ok: true, service: "trex-api", time: now(), database: process.env.DATABASE_URL ? "postgres" : "blobs", auth: (await ba()) ? "better-auth" : "built-in", auth_note: _baErr });
+    if (M === "GET" && route === "health") return out({ ok: true, service: "trex-api", time: now(), database: process.env.DATABASE_URL ? "postgres" : "blobs", auth: (await ba()) ? "better-auth" : "built-in", auth_note: _baErr, email: process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? "gmail" : process.env.RESEND_API_KEY ? "resend" : "preview" });
     if (M === "GET" && route === "rates") {
       let r = await rd("rates", null);
       const stale = !r || Date.now() - Date.parse(r.at) > 30 * 60 * 1000;
@@ -207,7 +217,7 @@ async function handle(req) {
       return out({ ok: true, at: r.at, source: r.source, stale: Date.now() - Date.parse(r.at) > 30 * 60 * 1000, perUSD: r.perUSD });
     }
     if (M === "GET" && route === "integrations")
-      return out({ ok: true, resend: !!process.env.RESEND_API_KEY, sms: false, paystack: !!process.env.PAYSTACK_SECRET_KEY, auth: true, admins: !!process.env.ADMIN_EMAILS });
+      return out({ ok: true, resend: !!process.env.RESEND_API_KEY, email: !!(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) ? "gmail" : process.env.RESEND_API_KEY ? "resend" : "none", sms: false, paystack: !!process.env.PAYSTACK_SECRET_KEY, auth: true, admins: !!process.env.ADMIN_EMAILS });
 
     if (M === "POST" && route === "otp") {
       const target = String(body.email || body.phone || "").trim().toLowerCase();
@@ -221,6 +231,7 @@ async function handle(req) {
       await audit(`OTP requested for ${target}`);
       const r = await email(target, "Your Trex code", `Your Trex code is ${code}. It expires in 10 minutes.`);
       if (r.sent) return out({ ok: true, email_sent: true, expires_in: 600 });
+      if (r.reason === "no-key" && isAdmin(target)) return err("Email sending is not set up yet, so the admin account cannot sign in. Add GMAIL_USER and GMAIL_APP_PASSWORD in Netlify first.", 503);
       if (r.reason === "no-key") return out({ ok: true, demo_code: code, expires_in: 600, preview: true });
       return err("Email failed to send — check the address and try again.", 502);
     }
@@ -288,6 +299,35 @@ async function handle(req) {
     let e401;
     const pubT = (t) => { const { vendor_email, customer_email, email, ...r } = t; return { ...r, role: me && me === vendor_email ? "vendor" : "customer" }; };
 
+    if (route === "liveness") {
+      const sub = parts[1];
+      if (sub === "flags" && M === "GET") { if ((e401 = needAdmin())) return e401; return out({ ok: true, flags: (await rd("liveflags", [])).filter((f) => !f.cleared) }); }
+      if (sub === "clear" && M === "POST") {
+        if ((e401 = needAdmin())) return e401;
+        const em = String(body.email || "").toLowerCase(), u = await rd("live-" + em, null); if (!u) return err("No face check found for that email.", 404);
+        u.status = "verified"; await wr("live-" + em, u);
+        const fl = await rd("liveflags", []); fl.forEach((x) => { if (x.email === em) x.cleared = true; }); await wr("liveflags", fl); await audit(`Face check cleared for ${em} by ${me}`);
+        return out({ ok: true });
+      }
+      if ((e401 = needAuth())) return e401;
+      if (sub === "me" && M === "GET") { const u = await rd("live-" + me, null); return out({ ok: true, status: u ? u.status : "none" }); }
+      if (M === "POST") {
+        const fr = Array.isArray(body.frames) ? body.frames : [], fb = !!body.fallback;
+        if (fr.length !== 3 || fr.some((x) => !/^data:image\/jpeg;base64,/.test(String(x)) || String(x).length > 120000)) return err("Face check images were not accepted. Please try again.");
+        if (!/^[0-9a-f]{16}$/.test(String(body.hash || ""))) return err("Face check failed. Please try again.");
+        const motion = Number(body.motion) || 0;
+        if (!fb && motion < 3) return err("We couldn't see you move. Try again in good light and follow each instruction.");
+        const hashes = (await rd("livehashes", [])).filter((h) => h.email !== me);
+        const pop = (x) => x.toString(2).split("1").length - 1, mine = BigInt("0x" + body.hash);
+        const dup = hashes.find((h) => pop(mine ^ BigInt("0x" + h.hash)) <= 3);
+        const status = dup || fb ? "review" : "verified";
+        hashes.push({ email: me, hash: body.hash }); await wr("livehashes", hashes);
+        await wr("live-" + me, { email: me, at: now(), hash: body.hash, frames: fr, motion, challenges: body.challenges || [], status, fallback: fb });
+        if (dup) { const fl = await rd("liveflags", []); fl.push({ email: me, match: dup.email, at: now() }); await wr("liveflags", fl); }
+        await audit(`Face check ${status} for ${me}`);
+        return out({ ok: true, status });
+      }
+    }
     if (route === "banks" && M === "GET") {
       let b = await rd("banks", null);
       if ((!b || Date.now() - Date.parse(b.at) > 864e5) && PK()) {
@@ -335,6 +375,7 @@ async function handle(req) {
         return out({ ok: true, offers: src.map(({ owner, ...o }) => ({ ...o, mine: !!me && owner === me })) });
       }
       if ((e401 = needAuth())) return e401;
+      if (!body.id) { const lv = await rd("live-" + me, null); if (lv && lv.status === "review") return err("Your account is under a quick review. Our team will contact you shortly.", 403); }
       if (body.id) {
         const o = list.find((x) => x.id === body.id);
         if (!o) return err("Offer not found.", 404);

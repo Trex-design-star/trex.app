@@ -8,10 +8,11 @@ def transfers(): return json.loads(urllib.request.urlopen(B+"__transfers").read(
 def signup(pg,email,name):
     pg.goto(B+"onboarding.html"); pg.select_option("#country","NG"); pg.click("#countryGo")
     pg.fill("#email",email); pg.click("#sendEmailOtp"); pg.wait_for_timeout(1500); pg.click("#verifyEmail"); pg.wait_for_timeout(600)
+    pg.click("#liveStart"); pg.wait_for_function("document.getElementById('liveMsg').textContent.includes('complete')",timeout=40000)
     pg.fill("#fullName",name); pg.fill("#pin","1234"); pg.click("#finishPersonal"); pg.click("#skipVendor")
 with sync_playwright() as p:
-    b=p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome",args=["--no-sandbox"])
-    V=b.new_context().new_page(); C=b.new_context().new_page()
+    b=p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome",args=["--no-sandbox","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream"])
+    V=b.new_context(permissions=["camera"]).new_page(); C=b.new_context(permissions=["camera"]).new_page()
     for pg in (V,C): pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("dialog",lambda d:d.accept("rcpt-1"))
     V.goto(B+"onboarding.html"); print("SIGNIN LINK ON SIGNUP:",V.is_visible("text=Already have an account? Sign in"))
     signup(V,"vendor@x.com","Zed Okafor"); signup(C,"cust@x.com","Ada Obi")

@@ -1,8 +1,10 @@
+process.env.GMAIL_USER="t@gmail.com";process.env.GMAIL_APP_PASSWORD="abcd efgh ijkl mnop";
+import nm from "nodemailer";const CODE=()=>/(\d{6})/.exec(nm.__sent.at(-1).text)[1];
 process.env.DATABASE_URL="postgres://fake";process.env.ADMIN_EMAILS="admin@x.com";process.env.PAYSTACK_SECRET_KEY="";
 import h from "./api.mjs";import pgm from "pg";
 let n=0,bad=0;const ok=(c,l)=>{n++;if(!c){bad++;console.log("FAIL",l)}};
 const call=async(m,p,b,tok)=>{const r=await h(new Request("http://x/api"+p,{method:m,headers:{"content-type":"application/json",...(tok?{authorization:"Bearer "+tok}:{})},body:b?JSON.stringify(b):undefined}));return r.json()};
-const login=async e=>{const o=await call("POST","/otp",{email:e});return call("POST","/verify",{email:e,code:o.demo_code,country:"NG"})};
+const login=async e=>{const o=await call("POST","/otp",{email:e});return call("POST","/verify",{email:e,code:CODE(),country:"NG"})};
 let hl=await call("GET","/health");ok(hl.database==="postgres"&&hl.auth==="better-auth","engines: "+JSON.stringify(hl));
 for(const mode of ["both","body","header"]){globalThis.__BA_MODE=mode;const v=await login("m"+mode+"@x.com");
   ok(v.ok&&v.engine==="better-auth"&&!v.token.includes("."),"BA sign-in shape "+mode+": "+JSON.stringify(v).slice(0,90));
