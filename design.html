@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Brand sheet</title>
+<style>
+  :root{
+    --black:#0B0D12; /* authority / safety */
+    --blue:#155EEF; /* trust / primary action */
+    --blue-dark:#0B2FB3;
+    --blue-soft:#E4EBFF;
+    --brown:#8C5A2B; /* stability / assurance */
+    --brown-soft:#F4E9D8;
+    --red:#D92D20; /* alert / dispute */
+    --red-soft:#FEE4E2;
+    --ink:#0B0D12;
+    --muted:#4B5563;
+    --bg:#2A0A54;
+    --card:#FFFFFF;
+    --line:#E4E0D6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:640px;margin:0 auto;padding:24px 16px 48px}
+  .topbar{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px 20px}
+  .topbar p{margin:4px 0 0;color:#C7CBD1;font-size:13px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:16px 0}
+  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  h1{font-size:32px;line-height:1.15;margin:0 0 8px;font-weight:800}
+  h2{font-size:22px;margin:0 0 8px;font-weight:700}
+  p,li{font-size:15px;line-height:1.6}
+  .small{font-size:13px;color:var(--muted)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .swatches{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .swatch{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .chip{height:64px}
+  .swatch div:last-child{padding:10px 12px;font-size:13px}
+  .btn{display:inline-block;border:0;border-radius:12px;padding:14px 18px;
+    font-size:16px;font-weight:700;cursor:pointer;width:100%;text-align:center;margin:8px 0}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:var(--blue-dark)}
+  .btn-secondary{background:#fff;color:var(--black);border:2px solid var(--black)}
+  .btn-brown{background:var(--brown);color:#fff}
+  .btn-disabled{background:#D0D5DD;color:#fff;cursor:not-allowed}
+  .btn-row{display:grid;gap:4px}
+  label{font-size:13px;font-weight:600;display:block;margin:14px 0 6px}
+  input,select{width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;
+    font-size:16px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  .amount-wrap{position:relative}
+  .amount-wrap span{position:absolute;left:14px;top:14px;font-weight:800}
+  .amount-wrap input{padding-left:32px}
+  .proof{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted)}
+  .badge{display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .b-trust{background:var(--blue-soft);color:var(--blue-dark)}
+  .b-assure{background:var(--brown-soft);color:var(--brown)}
+  .b-alert{background:var(--red-soft);color:var(--red)}
+  .b-black{background:var(--black);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p><a href="index.html" style="color:#155EEF;font-weight:700;text-decoration:none">← Back to Trex</a> • <a href="more.html" style="color:#155EEF;font-weight:700;text-decoration:none">All pages →</a></p>
+  <div class="topbar">
+    <p style="margin:0;font-size:12px;letter-spacing:.12em;color:#9AA0AA">TREX • BRAND SHEET</p>
+    <h1 style="color:#fff;margin:8px 0">Safe. Secured. Assured.</h1>
+    <p>Black for authority, blue for trust, brown for stability, red only for real danger.</p>
+  </div>
+  <p>
+    <span class="badge b-black">Black — secure foundation</span>
+    <span class="badge b-trust">Blue — trusted action</span>
+    <span class="badge b-assure">Brown — stable assurance</span>
+    <span class="badge b-alert">Red — dispute / danger</span>
+  </p>
+
+  <div class="card">
+    <p class="eyebrow">Colors — safety & assurance</p>
+    <h2>Palette</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#0B0D12"></div><div><b>Black / Authority</b><br><span class="mono">#0B0D12</span> — headers, text, secure frame</div></div>
+      <div class="swatch"><div class="chip" style="background:#155EEF"></div><div><b>Blue / Trust</b><br><span class="mono">#155EEF</span> — primary buttons, links, confirmations</div></div>
+      <div class="swatch"><div class="chip" style="background:#8C5A2B"></div><div><b>Brown / Stability</b><br><span class="mono">#8C5A2B</span> — badges, bond balance, assurance notes</div></div>
+      <div class="swatch"><div class="chip" style="background:#D92D20"></div><div><b>Red / Alert</b><br><span class="mono">#D92D20</span> — disputes, destructive actions only</div></div>
+    </div>
+    <p class="small">Background: warm paper #F7F4EF. Never use red for normal actions — reserve it so it keeps its warning meaning.</p>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Typography</p>
+    <h2>Heading — Inter Bold 22px</h2>
+    <p>Body — Inter Regular 15px / 1.6. Plain language, ₦ formatting: <b>₦1,250,000.00</b>. Amounts use tabular figures so digits align.</p>
+    <p class="small">Caption — 13px muted for fees, windows, trust stats.</p>
+    <p class="mono">Mono — receipts and reference numbers: TXN-8F3K2A</p>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Buttons</p>
+    <h2>Styled buttons</h2>
+    <div class="btn-row">
+      <button class="btn btn-primary">I've sent payment</button>
+      <button class="btn btn-secondary">Please confirm receipt</button>
+      <button class="btn btn-brown">Bond balance — ₦125,000 protected</button>
+      <button class="btn btn-disabled" disabled>Confirm disabled — proof required</button>
+    </div>
+    <p class="small">Blue = the safe next step. Black outline = secondary choice. Brown = reassurance and bond info. Big and thumb-friendly on every Android phone.</p>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Inputs</p>
+    <h2>Sample trade input</h2>
+    <label for="amt">You send</label>
+    <div class="amount-wrap"><span>₦</span><input id="amt" value="250,000.00" /></div>
+    <label for="method">Payment method</label>
+    <select id="method"><option>Bank transfer — GTBank •••4521</option><option>Bank transfer — Access •••8890</option><option>PayPal receipt upload</option></select>
+    <label>Proof of payment</label>
+    <div class="proof">Tap to upload your bank receipt screenshot<br><span class="small">Vendors can't confirm until your receipt is attached</span></div>
+    <button class="btn btn-primary">Attach proof &amp; mark as sent</button>
+  </div>
+</div>
+</body>
+</html>

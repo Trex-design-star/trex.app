@@ -1,0 +1,15 @@
+{
+  "model": "standing",
+  "base": "USD",
+  "caps": {
+    "USD": 10000,
+    "NGN": 8000000,
+    "GBP": 4000,
+    "EUR": 6000
+  },
+  "reserved": {
+    "OFR-1": 0.0
+  },
+  "fees_paid": {
+  }
+}

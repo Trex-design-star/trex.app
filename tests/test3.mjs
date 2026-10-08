@@ -1,0 +1,62 @@
+import crypto from "node:crypto";
+process.env.PAYSTACK_SECRET_KEY="sk_test_x";process.env.ADMIN_EMAILS="admin@x.com";
+import h from "./api.mjs";
+let n=0,bad=0;const ok=(c,l)=>{n++;if(!c){bad++;console.log("FAIL",l)}};
+const transfers=[];
+globalThis.fetch=async(u,o={})=>{const b=o.body?JSON.parse(o.body):{};const J=(x,s=200)=>new Response(JSON.stringify(x),{status:s});
+ if(u.includes("/bank/resolve"))return J({status:true,data:{account_name:"ZED OKAFOR"}});
+ if(u.includes("/transferrecipient"))return J({status:true,data:{recipient_code:"RCP_1",details:{bank_name:"GTBank"}}});
+ if(u.endsWith("/customer"))return J({status:true,data:{customer_code:"CUS_1"}});
+ if(u.endsWith("/dedicated_account"))return J({status:true,data:{account_number:"9900112233",account_name:"TREX/ZED",bank:{name:"Wema Bank"}}});
+ if(u.endsWith("/transfer")){transfers.push(b);return J({status:true,data:{reference:b.reference}})}
+ return J({result:"fail"})};
+const call=async(m,p,b,tok)=>{const r=await h(new Request("http://x/api"+p,{method:m,headers:{"content-type":"application/json",...(tok?{authorization:"Bearer "+tok}:{})},body:b?JSON.stringify(b):undefined}));return r.json()};
+const signup=async(e,country)=>{const o=await call("POST","/otp",{email:e});const v=await call("POST","/verify",{email:e,code:o.demo_code,country});return v.token};
+const V=await signup("v@x.com","NG"),C=await signup("c@x.com","NG"),A=await signup("admin@x.com","NG"),G=await signup("gh@x.com","GH");
+ok((await call("POST","/otp",{email:"v@x.com"})).demo_code&&(await call("POST","/verify",{email:"v@x.com",code:"1"})).error,"wrong code rejected");
+const re=await signup("v@x.com","NG");ok(re,"returning sign-in works");
+const nu=await call("POST","/otp",{email:"new@x.com"});const nv=await call("POST","/verify",{email:"new@x.com",code:nu.demo_code});ok(nv.is_new===true,"is_new flag");
+await call("POST","/bond/account",{account_number:"0123456789",bank_code:"058"},V);
+const of=(await call("POST","/offers",{provide:"USD",want:"NGN",rate:1500,min:10,max:100,vendor:"Zed • ★new • 0 trades"},V)).offer;
+const hook=async ev=>{const raw=JSON.stringify(ev);const s=crypto.createHmac("sha512","sk_test_x").update(raw).digest("hex");return (await h(new Request("http://x/api/paystack/webhook",{method:"POST",headers:{"x-paystack-signature":s},body:raw}))).status};
+const open=async(amt,tok=C)=>(await call("POST","/trades",{offer_id:of.id,sell:"NGN",recv:"USD",amount:amt},tok));
+const act=(id,a,x,tok)=>call("POST","/trade_action",{id,action:a,...x},tok);
+const st=async(id,tok=C)=>(await call("GET","/trades","",tok)).trades.find(t=>t.id===id).state;
+// open with NO bond money: allowed, waits for vendor
+let t=await open(50);ok(t.ok&&t.trade.state==="awaiting_vendor","opens awaiting vendor");const id=t.trade.id;
+ok(!(await act(id,"pay",{proof:"x"},C)).ok,"cannot pay before acceptance");
+ok(!(await act(id,"accept",{},C)).ok,"customer cannot accept");
+ok((await act(id,"accept",{},V)).trade.state==="awaiting_bond","accept w/o money -> awaiting_bond");
+ok(!(await act(id,"pay",{proof:"x"},C)).ok,"cannot pay while bond missing");
+ok(await hook({event:"charge.success",data:{reference:"R1",channel:"dedicated_nuban",currency:"NGN",amount:4000000,customer:{email:"v@x.com"}}})===200,"deposit webhook");
+ok(await st(id)==="opened","bond arrival auto-starts trade");
+let me=await call("GET","/bond/me","",V);ok(me.locked===37500&&me.available===2500,"bond locked 37500: "+me.locked);
+ok((await act(id,"pay",{proof:"r.png"},C)).ok,"pay");ok((await act(id,"confirm",{},V)).ok,"confirm");
+ok((await act(id,"deliver",{proof:"d"},V)).ok,"deliver");ok((await act(id,"complete",{},C)).ok,"complete");
+ok(transfers.length===1&&transfers[0].amount===3750000,"bond returned to bank immediately");
+// chat
+let ch=await call("GET","/chat?trade="+id,"",C);ok(ch.ok&&ch.messages.some(m=>m.from==="system"),"system messages");
+ok((await call("POST","/chat",{trade:id,text:"Hello, sent!"},C)).ok,"customer message");
+ok((await call("POST","/chat",{trade:id,text:"call me 08031234567"},V)).held===true,"phone blocked");
+ok((await call("POST","/chat",{trade:id,text:"chat me on whatsapp"},V)).held===true,"whatsapp blocked");
+ok((await call("POST","/chat",{trade:id,text:"1500 rate ok"},V)).ok,"normal numbers allowed");
+ok((await call("POST","/chat",{trade:id,image:"data:image/jpeg;base64,AAAA"},V)).ok,"image message");
+ok(!(await call("POST","/chat",{trade:id,image:"data:text/html;base64,AAAA"},V)).ok,"bad attachment rejected");
+ok((await call("GET","/chat?trade="+id,"",G)).error?.includes("private"),"stranger blocked");
+ok((await call("GET","/chat?trade="+id,"",A)).error?.includes("private"),"admin blocked unless disputed");
+const since=ch.messages.at(-1).at;ch=await call("GET","/chat?trade="+id+"&since="+since,"",V);ok(ch.messages.length>=1&&ch.other_read,"incremental + read receipt");
+// decline + immediate acceptance with free balance
+t=await open(20);ok((await act(t.trade.id,"decline",{},V)).trade.state==="cancelled","vendor declines");
+await hook({event:"charge.success",data:{reference:"R2",channel:"dedicated_nuban",currency:"NGN",amount:5000000,customer:{email:"v@x.com"}}});
+t=await open(20);ok((await act(t.trade.id,"accept",{},V)).trade.state==="opened","accept with funds -> opened at once");
+await act(t.trade.id,"pay",{proof:"p"},C);await act(t.trade.id,"dispute",{},C);
+ok((await call("GET","/chat?trade="+t.trade.id,"",A)).ok,"admin may read disputed chat");
+const d=(await call("GET","/disputes","",A)).disputes[0];ok((await call("POST","/resolve",{id:d.id,how:"VENDOR-AT-FAULT"},A)).ok,"resolve");
+me=await call("GET","/bond/me","",V);ok(me.locked===0,"nothing locked after forfeit");
+// non-NG country
+const og=(await call("POST","/offers",{provide:"GHS",want:"USD",rate:1,min:1,max:50,vendor:"Kofi"},G)).offer;
+const tg=await call("POST","/trades",{offer_id:og.id,sell:"USD",recv:"GHS",amount:5},C);
+ok((await act(tg.trade.id,"accept",{},G)).error?.includes("coming soon"),"non-NG vendor gated");
+ok((await call("POST","/bond/deposit",{},G)).error?.includes("coming soon"),"non-NG deposit gated");
+ok((await call("GET","/bond/me","",G)).supported===false,"supported flag");
+console.log(n+" checks, "+bad+" failed");

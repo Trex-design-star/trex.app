@@ -1,0 +1,13 @@
+Environment variables to add in Netlify (Site configuration -> Environment variables):
+DATABASE_URL        = your Neon Postgres connection string (starts with postgres://). Turns on Postgres + Better Auth.
+ADMIN_EMAILS        = your own email (several allowed, separated by commas). These emails get the admin screen.
+PAYSTACK_SECRET_KEY = your Paystack secret key (sk_test_... now, sk_live_... after your business is approved)
+RESEND_API_KEY      = your Resend key
+RESEND_FROM         = Trex <hello@yourdomain.com>
+PAYSTACK_BANK       = (optional) test-bank while in test mode, wema-bank when live
+Paystack dashboard -> Settings -> API Keys & Webhooks -> Webhook URL:
+https://YOURSITE.netlify.app/api/paystack/webhook
+After deploying, open https://YOURSITE.netlify.app/api/health  -> it should say "database":"postgres" and "auth":"better-auth".
+
+ONE-CLICK BETTER AUTH CHECK (after deploy and after signing in with your admin email):
+open https://YOURSITE.netlify.app/api/authcheck  -> every line must say "ok":true

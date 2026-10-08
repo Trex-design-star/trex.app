@@ -1,0 +1,59 @@
+[
+  {
+    "id": "OFR-1",
+    "provide": "USD",
+    "want": "NGN",
+    "rate": 1520,
+    "min": 65,
+    "max": 330,
+    "vendor": "Adaobi",
+    "country": "NG",
+    "tier": "Gold",
+    "capacity": 4000,
+    "rating": 4.8,
+    "trades": 312,
+    "methods": [
+      "Bank transfer"
+    ],
+    "terms": "Pay within 30 minutes.",
+    "live": true
+  },
+  {
+    "id": "OFR-2",
+    "provide": "GBP",
+    "want": "NGN",
+    "rate": 1940,
+    "min": 103,
+    "max": 2060,
+    "vendor": "Tunde",
+    "country": "NG",
+    "tier": "Gold",
+    "capacity": 3000,
+    "rating": 4.9,
+    "trades": 540,
+    "methods": [
+      "Bank transfer"
+    ],
+    "terms": "Pay within 30 minutes.",
+    "live": true
+  },
+  {
+    "id": "OFR-3",
+    "provide": "EUR",
+    "want": "NGN",
+    "rate": 1650,
+    "min": 60,
+    "max": 1500,
+    "vendor": "New vendor",
+    "country": "NG",
+    "tier": "Probation",
+    "capacity": 2000,
+    "rating": null,
+    "trades": 3,
+    "methods": [
+      "Bank transfer"
+    ],
+    "terms": "Pay within 1 hour.",
+    "live": true
+  }
+]

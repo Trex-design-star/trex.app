@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Your protection</title>
+<script src="js/trex.js"></script>
+<script src="js/api.js"></script>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
+    --brown:#8C5A2B;--brown-soft:#F4E9D8;--green:#027A48;--green-soft:#DCFAE6;
+    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:16px 14px 96px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
+  .nav b{letter-spacing:.08em;color:#fff}
+  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600;margin-left:12px}
+  .prev{display:inline-block;font-size:11px;font-weight:700;background:var(--brown-soft);color:var(--brown);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;display:inline-block}
+  .b-ok{background:var(--green-soft);color:var(--green)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cap{border:1px solid var(--line);border-radius:12px;padding:12px}
+  .bar{height:10px;background:#EDE9DE;border-radius:999px;overflow:hidden;margin:8px 0}
+  .bar i{display:block;height:100%;background:var(--blue)}
+  label{font-size:13px;font-weight:700;display:block;margin:12px 0 4px}
+  input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px}
+  .btn{width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-black{background:var(--black);color:#fff}
+  .log{background:#0B0D12;color:#D1D5DB;border-radius:10px;padding:12px;font-size:12px;white-space:pre-line;min-height:80px}
+  .rule50{background:#0B0D12;color:#fff;border-radius:12px;padding:14px;border:2px solid #F2B705;margin-bottom:4px}
+  .rule50 b{color:#F2B705}
+  .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex}
+  .bottomnav a{flex:1;text-align:center;padding:12px 2px;font-size:11px;font-weight:700;color:var(--muted);text-decoration:none}
+  .bottomnav a.on{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><span><a href="dashboard.html">Home</a><a href="offers.html">Offers</a></span></div>
+  <span class="prev">Preview — sample figures, no real money moves</span>
+  <div class="top">
+    <h2 style="margin:0 0 6px">Your protection</h2>
+    <div class="muted" style="color:#C7CBD1">One simple bond: 50% of every order, held only while that trade is open.</div>
+  </div>
+
+  <div class="rule50">
+    <span class="badge" style="background:#F2B705;color:#0B0D12">50% PER-TRADE BOND</span>
+    <p style="font-size:15px">Customer orders <b>$200</b> → <b>$100</b> of your money locks for that trade.<br>
+    You deliver → it comes <b>straight back</b>.<br>
+    You don't → it <b>pays the customer</b>.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b>Bond balances</b><span class="badge b-ok">Fully refundable ✓</span></div>
+    <p class="muted">Keep enough in each currency you sell — every open order needs its 50% covered.</p>
+    <div class="grid" id="capGrid"></div>
+    <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>Open trades (demo)</label><input id="openTrades" type="number" value="0" min="0" max="10"></div>
+      <div><label>&nbsp;</label><div class="muted" id="lockLine" style="padding-top:12px"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Top up</b>
+    <p class="muted">Send money to your dedicated Trex account. We confirm it and credit the right currency.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label>Currency</label><select id="topCur"></select></div>
+      <div><label>Amount</label><input id="topAmt" type="number" value="1000"></div>
+    </div>
+    <button class="btn btn-black" id="topBtn">I've sent the transfer</button>
+    <div class="log" id="inLog">Waiting for your transfer…</div>
+  </div>
+
+  <div class="card">
+    <b>Withdraw</b>
+    <p class="muted">Free balances withdraw anytime. Large withdrawals need a second approval.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label>Currency</label><select id="relCur"></select></div>
+      <div><label>Amount</label><input id="relAmt" type="number" value="500"></div>
+    </div>
+    <button class="btn btn-blue" id="relBtn">Withdraw</button>
+    <div class="log" id="outLog">No withdrawals yet.</div>
+  </div>
+</div>
+<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html">Profile</a><a href="more.html">More</a></nav>
+<script>
+var $=function(id){return document.getElementById(id);};
+var bond=TREX.load("trex_bond",{caps:{USD:10000,NGN:8000000,GBP:4000,EUR:6000},locked:{}});
+function save(){ TREX.store("trex_bond",bond); }
+function fillCur(sel){ sel.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.code; sel.appendChild(o); }); }
+function paint(){
+  var g=$("capGrid"); g.innerHTML="";
+  var openN=Number($("openTrades").value)||0;
+  Object.keys(bond.caps).forEach(function(code){
+    var bal=bond.caps[code], c=TREX.getCurrency(code);
+    var d=document.createElement("div"); d.className="cap";
+    d.innerHTML="<div style='font-size:20px'>"+(c?c.flag:"")+"</div><b>"+code+"</b><div style='font-size:18px;font-weight:800'>"+TREX.fmt(bal,code)+"</div><div class='muted'>available bond</div>";
+    g.appendChild(d);
+  });
+  $("lockLine").textContent=openN?("~"+openN+" open trade(s): 50% of each order value is locked right now."):"No open trades — nothing locked.";
+}
+["topCur","relCur"].forEach(function(id){ fillCur($(id)); });
+$("topCur").value="USD"; $("relCur").value="USD";
+$("openTrades").oninput=paint; paint();
+$("topBtn").onclick=function(){
+  var c=$("topCur").value, a=Number($("topAmt").value)||0;
+  if(!(a>0)){ alert("Enter an amount above zero."); return; }
+  bond.caps[c]=(bond.caps[c]||0)+a; save(); paint();
+  $("inLog").textContent="Transfer received ✓\n+"+TREX.fmtMoney(a,c)+" added to your "+c+" bond.";
+  TREX.audit("Bond topped up "+a+" "+c);
+};
+$("relBtn").onclick=function(){
+  var c=$("relCur").value, a=Number($("relAmt").value)||0;
+  var openN=Number($("openTrades").value)||0;
+  if(openN>0){ $("outLog").textContent="Finish your open trades first — their 50% bonds are still locked."; return; }
+  if(!(a>0)||a>(bond.caps[c]||0)){ $("outLog").textContent="That exceeds your free "+c+" balance."; return; }
+  bond.caps[c]-=a; save(); paint();
+  var ref="REF-"+Date.now().toString(36).toUpperCase();
+  $("outLog").textContent="Withdrawal "+ref+": "+TREX.fmtMoney(a,c)+" sent to your bank. ✓"+(a>5000?"\nLarge amount — second approval recorded.":"");
+  TREX.audit("Bond withdrawal "+a+" "+c+" "+ref);
+};
+</script>
+<script>
+/* Live mode: real Paystack deposits and automatic payouts (only when signed in). */
+(function(){
+  var tok=localStorage.getItem("trex_session"); if(!tok||!window.API||!API.on) return;
+  var $=function(i){return document.getElementById(i);};
+  function esc(x){ return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function H(k){ var h={"Content-Type":"application/json",Authorization:"Bearer "+tok}; if(k)h["X-Idempotency-Key"]="k_"+Date.now()+Math.random().toString(16).slice(2); return h; }
+  function J(p,o){ return fetch("/api"+p,o||{headers:H()}).then(function(r){return r.json();}); }
+  var last=null, poll=null;
+  J("/bond/me").then(function(m){
+    if(!m||!m.ok) return;
+    if(m.supported===false){ var w=document.createElement("div"); w.className="card"; w.innerHTML="<b>Bond for your country is coming soon</b><p class='muted'>Bond deposits and withdrawals are available in naira (Nigeria) only for now. We will add more currencies as soon as we can.</p>"; $("topCur").closest(".card").parentNode.insertBefore(w,$("topCur").closest(".card")); return; }
+    $("topCur").innerHTML='<option value="NGN">🇳🇬 NGN</option>'; $("relCur").innerHTML='<option value="NGN">🇳🇬 NGN</option>';
+    $("topAmt").parentNode.style.display="none"; $("openTrades").parentNode.parentNode.style.display="none";
+    $("topBtn").textContent="Show my deposit account";
+    var card=document.createElement("div"); card.className="card";
+    card.innerHTML="<b>Payout account</b><p class='muted' id='payNote'>Your bond returns here the moment each trade completes.</p><label>Bank</label><select id='payBank'><option value=''>Loading banks…</option></select><label>Account number</label><input id='payNo' inputmode='numeric' maxlength='10' placeholder='10-digit account number'><button class='btn btn-black' id='paySave'>Save payout account</button><div class='log' id='payLog'>Not saved yet.</div>";
+    $("topCur").closest(".card").parentNode.insertBefore(card,$("topCur").closest(".card"));
+    J("/banks").then(function(b){ $("payBank").innerHTML="<option value=''>Choose your bank</option>"+(b.banks||[]).map(function(x){return "<option value='"+esc(x.code)+"'>"+esc(x.name)+"</option>";}).join(""); });
+    $("paySave").onclick=function(){
+      J("/bond/account",{method:"POST",headers:H(),body:JSON.stringify({account_number:$("payNo").value,bank_code:$("payBank").value})}).then(function(r){
+        $("payLog").textContent=r.ok?("Saved ✓ "+r.bank.account_name+" • "+(r.bank.bank_name||"")+" •••"+r.bank.last4):(r.error||"Couldn't save."); if(r.ok)refresh(); });
+    };
+    function paint(m){
+      var g=$("capGrid"); g.innerHTML="";
+      [["Free balance",m.available,"covers new orders"],["Locked now",m.locked,"released when trades complete"]].forEach(function(x){
+        var d=document.createElement("div"); d.className="cap"; d.innerHTML="<div style='font-size:20px'>🇳🇬</div><b>NGN</b><div style='font-size:18px;font-weight:800'>"+TREX.fmtMoney(x[1],"NGN")+"</div><div class='muted'>"+x[2]+"</div>"; g.appendChild(d); });
+      $("lockLine").textContent=m.locked>0?"50% of each open order is locked right now.":"No open trades — nothing locked.";
+      if(m.bank) $("payLog").textContent="Saved ✓ "+m.bank.account_name+" • "+(m.bank.bank_name||"")+" •••"+m.bank.last4;
+      var p=(m.payouts||[])[0]; if(p&&p.status==="success"&&last!==p.ref){ last=p.ref; }
+      return m;
+    }
+    function refresh(){ return J("/bond/me").then(function(m){ if(m&&m.ok){ var prev=window._avail; window._avail=m.available; paint(m); if(prev!==undefined&&m.available>prev&&poll){ $("inLog").textContent="Transfer received ✓\n+"+TREX.fmtMoney(m.available-prev,"NGN")+" added to your bond."; } } }); }
+    refresh();
+    $("topBtn").onclick=function(){
+      J("/bond/deposit",{method:"POST",headers:H(),body:JSON.stringify({name:localStorage.getItem("trex_name")||""})}).then(function(r){
+        if(!r.ok){ $("inLog").textContent=r.error||"Couldn't open your deposit account."; return; }
+        $("inLog").textContent=r.dva?("Send any amount to:\n"+r.dva.bank+" • "+r.dva.account_number+"\n"+r.dva.account_name+"\nWe credit your bond automatically."):"Your deposit account is being created — tap again in a minute.";
+        clearInterval(poll); poll=setInterval(refresh,8000);
+      });
+    };
+    $("relBtn").onclick=function(){
+      var a=Number($("relAmt").value)||0;
+      J("/bond/withdraw",{method:"POST",headers:H(1),body:JSON.stringify({amount:a})}).then(function(r){
+        $("outLog").textContent=!r.ok?(r.error||"Couldn't withdraw."):r.status==="pending"?"Withdrawal sent to your bank ✓":r.status==="pending_approval"?"Large amount — waiting for a second team approval.":"Couldn't send just now — the money stays in your free balance.";
+        refresh(); });
+    };
+    setInterval(refresh,15000);
+    var tq=new URLSearchParams(location.search).get("trade");
+    if(tq){
+      var bn=document.createElement("div"); bn.id="tradeNeed"; bn.className="card"; bn.style.border="2px solid #F2B705"; bn.innerHTML="Loading your trade…"; card.parentNode.insertBefore(bn,card);
+      var tt=null;
+      var chk=function(){ J("/bond/check",{method:"POST",headers:H()}).then(function(){ return J("/trades"); }).then(function(r){
+        var t=((r&&r.trades)||[]).filter(function(x){return x.id===tq;})[0]; if(!t) return;
+        if(t.state==="awaiting_bond") bn.innerHTML="<b>Trade "+esc(t.id)+" is waiting for your bond</b><p>Deposit <b>"+TREX.fmtMoney(t.bond_ngn,"NGN")+"</b> (50% of the order) to the account below. The trade starts automatically the moment it arrives.</p>";
+        else if(t.state==="opened"){ bn.innerHTML="<b>Bond received ✓</b><p>Trade "+esc(t.id)+" has started. The customer can now send payment.</p><a class='btn btn-blue' href='vendor-dashboard.html'>Back to my dashboard</a>"; clearInterval(tt); refresh(); }
+        else bn.innerHTML="<b>Trade "+esc(t.id)+"</b><p>Status: "+esc(String(t.state).replace(/_/g," "))+"</p><a class='btn btn-blue' href='vendor-dashboard.html'>Back to my dashboard</a>"; }); };
+      chk(); tt=setInterval(chk,6000); setTimeout(function(){ $("topBtn").onclick(); },900);
+    }
+  });
+})();
+</script>
+</body>
+</html>

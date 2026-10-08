@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Become a vendor</title>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
+    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;--green:#027A48;--green-soft:#DCFAE6;
+    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:16px 14px 120px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
+  .nav b{letter-spacing:.08em;color:#fff}
+  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600;margin-left:12px}
+  .prev{display:inline-block;font-size:11px;font-weight:700;background:var(--brown-soft);color:var(--brown);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+  /* ---------- animated vendor scene ---------- */
+  .scene{position:relative;border-radius:20px;overflow:hidden;background:#0A0618;color:#fff;min-height:380px;padding:22px 18px}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5}
+  .b1{width:260px;height:260px;background:#155EEF;top:-80px;left:-60px;animation:drift 9s ease-in-out infinite}
+  .b2{width:220px;height:220px;background:#8C5A2B;bottom:-60px;right:-40px;animation:drift 11s ease-in-out infinite reverse}
+  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+  .float{position:absolute;font-weight:800;color:rgba(242,183,5,.9);text-shadow:0 0 14px rgba(242,183,5,.7);animation:rise 7s linear infinite;opacity:0}
+  @keyframes rise{0%{transform:translateY(30px);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(-190px);opacity:0}}
+  .swap{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0}
+  .coin-card{background:rgba(255,255,255,.96);color:var(--ink);border-radius:14px;padding:12px 16px;min-width:120px;text-align:center;animation:swapL 4s ease-in-out infinite}
+  .coin-card:last-child{animation-name:swapR}
+  .coin-card b{font-size:20px}
+  @keyframes swapL{0%,100%{transform:translateX(0)}50%{transform:translateX(26px)}}
+  @keyframes swapR{0%,100%{transform:translateX(0)}50%{transform:translateX(-26px)}}
+  .lockline{position:relative;z-index:2;text-align:center;margin-top:6px}
+  .lockline .shield{display:inline-block;background:rgba(18,183,106,.18);border:2px solid #12B76A;color:#fff;font-weight:800;border-radius:999px;padding:8px 18px;animation:shieldPulse 2.4s ease-in-out infinite}
+  @keyframes shieldPulse{0%,100%{box-shadow:0 0 12px rgba(18,183,106,.4)}50%{box-shadow:0 0 32px rgba(18,183,106,.85)}}
+  .scene h1{position:relative;z-index:2;margin:10px 0 4px;font-size:30px}
+  .scene p{position:relative;z-index:2;color:#C7CBD1;font-size:14px;margin:0}
+  /* ---------- content ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;display:inline-block}
+  .b-blue{background:var(--blue-soft);color:var(--blue-dark)}
+  .b-brown{background:var(--brown-soft);color:var(--brown)}
+  .b-red{background:var(--red-soft);color:var(--red)}
+  .b-green{background:var(--green-soft);color:var(--green)}
+  .rule50{background:#0B0D12;color:#fff;border-radius:var(--radius);padding:18px;margin:12px 0;border:2px solid #F2B705}
+  .rule50 b{color:#F2B705}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .do,.dont{border-radius:12px;padding:12px;font-size:13px}
+  .do{background:var(--green-soft)}
+  .dont{background:var(--red-soft)}
+  .do li,.dont li{margin:6px 0}
+  ul{padding-left:18px;margin:6px 0}
+  .warn{background:var(--red-soft);border:2px solid var(--red);border-radius:var(--radius);padding:16px;margin:12px 0}
+  .cta{position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,18,.92);padding:12px 16px;z-index:20}
+  .cta a{display:block;max-width:680px;margin:0 auto;text-align:center;background:var(--blue);color:#fff;font-weight:800;font-size:17px;border-radius:14px;padding:16px;text-decoration:none}
+  @media (prefers-reduced-motion:reduce){.blob,.float,.coin-card,.lockline .shield{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><span><a href="index.html">Home</a><a href="trade.html">Trade</a></span></div>
+  <span class="prev">Preview — sample figures, no real money moves</span>
+
+  <div class="scene" aria-hidden="false">
+    <div class="blob b1"></div><div class="blob b2"></div>
+    <span class="float" style="left:12%;bottom:40px;animation-delay:0s">$</span>
+    <span class="float" style="left:30%;bottom:20px;animation-delay:1.4s">€</span>
+    <span class="float" style="left:62%;bottom:50px;animation-delay:2.6s">₦</span>
+    <span class="float" style="left:80%;bottom:30px;animation-delay:3.8s">£</span>
+    <span class="float" style="left:46%;bottom:10px;animation-delay:5s">¥</span>
+    <h1>Become a vendor.</h1>
+    <p>Hold currencies. Fill orders in minutes. Earn on every swap.</p>
+    <div class="swap">
+      <div class="coin-card"><div class="muted">Customer pays</div><b>₦760,000</b></div>
+      <div style="font-size:24px">⇄</div>
+      <div class="coin-card"><div class="muted">You deliver</div><b>$500</b></div>
+    </div>
+    <div class="lockline"><span class="shield">🛡 $250 locked as bond → released on delivery ✓</span></div>
+  </div>
+
+  <div class="card">
+    <span class="badge b-blue">What is a vendor?</span>
+    <h3 style="margin:8px 0">The person who always has the currency.</h3>
+    <p>Imagine Ada needs <b>$100</b> and has naira. You have dollars sitting ready. She pays you the naira, you send her the <b>$100</b> — done in minutes. That is all a vendor does: <b>keep foreign currency ready, and swap it fast when an order comes.</b></p>
+    <p class="muted">Trex brings you the customers, shows your rating, and guarantees every trade with your bond. You bring the currency and the speed.</p>
+  </div>
+
+  <div class="rule50">
+    <span class="badge" style="background:#F2B705;color:#0B0D12">THE CORE RULE — 50% PER-TRADE BOND</span>
+    <p style="font-size:16px;line-height:1.6">For <b>every single order</b>, you lock <b>50% of that order's value</b> as a bond before the trade starts.</p>
+    <p>Customer orders <b>$200</b> → you lock <b>$100</b> for that trade.<br>
+    You deliver → your <b>$100 comes straight back</b>, plus your earnings.<br>
+    You fail to deliver → the <b>$100 compensates the customer</b>.</p>
+    <p class="muted" style="color:#C7CBD1">No standing balance. No exceptions. Every trade stands on its own bond — that is what makes customers trust a stranger with their money.</p>
+  </div>
+
+  <div class="card">
+    <b>How vending works, step by step</b>
+    <p><b>1. Post offers.</b> Pick your pairs, rate and limits. Buyers find you instantly.</p>
+    <p><b>2. Lock 50%.</b> Each order locks half its value as bond automatically.</p>
+    <p><b>3. Confirm &amp; deliver fast.</b> Confirm their payment, send the currency, attach proof.</p>
+    <p><b>4. Get it all back.</b> Bond released the moment the trade completes. Ratings build your name.</p>
+  </div>
+
+  <div class="card">
+    <b>Do's and Don'ts — every vendor lives by these</b>
+    <div class="cols">
+      <div class="do"><b>✅ Always do</b><ul>
+        <li>Keep the currencies you offer actually available</li>
+        <li>Confirm payments within minutes, day and night</li>
+        <li>Attach proof for every delivery</li>
+        <li>Keep 50% bond cover ready for each order you accept</li>
+        <li>Talk in the trade chat — it protects you too</li>
+      </ul></div>
+      <div class="dont"><b>❌ Never do</b><ul>
+        <li>Accept orders you cannot fill right now</li>
+        <li>Ask customers to pay outside Trex</li>
+        <li>Deliver late or in a different amount</li>
+        <li>Share your login or let others vend on your name</li>
+        <li>Dispute honestly completed trades</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="warn">
+    <span class="badge b-red">NOT FOR EVERYONE</span>
+    <p style="font-size:15px"><b>Vending is only for people who are 100% capable of delivering currency swaps</b> — you hold real balances, you respond in minutes, and you accept the 50% bond on every order. If you only want to exchange your own money sometimes, <b>stay a customer</b> — trading needs no bond at all.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge b-green">What you earn</span>
+    <p>Your spread on every swap, a public rating that brings more orders, and higher limits as your record grows. Top vendors fill hundreds of orders a month.</p>
+  </div>
+</div>
+<div class="cta"><a href="offers.html">Create your vendor profile →</a></div>
+</body>
+</html>

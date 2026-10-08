@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Sign in</title>
+<script src="js/trex.js"></script>
+<script src="js/api.js"></script>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-soft:#E4EBFF;--brown:#8C5A2B;--red:#D92D20;--ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 14px 48px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px}
+  .nav b{letter-spacing:.08em;color:#fff}.nav a{color:#B9CCFF;text-decoration:none;font-weight:600;font-size:14px}
+  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  label{font-size:13px;font-weight:700;display:block;margin:12px 0 4px}
+  input{width:100%;padding:13px;border:1.5px solid var(--line);border-radius:10px;font-size:16px}
+  input:focus{outline:none;border-color:var(--blue)}
+  .otp{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .otp input{text-align:center;font-size:20px;font-weight:800;padding:10px 4px}
+  .btn{width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;text-decoration:none;display:block;text-align:center}
+  .btn-blue{background:var(--blue);color:#fff}.btn-line{background:#fff;border:2px solid var(--black);color:var(--black)}
+  .hidden{display:none}.err{color:var(--red);font-size:13px;margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><a href="index.html">Home</a></div>
+  <div class="top"><h2 style="margin:0 0 6px">Welcome back</h2>
+  <div class="muted" style="color:#C7CBD1">Sign in with your email. We send a 6-digit code — no password needed.</div></div>
+
+  <div class="card" id="s1">
+    <label for="email">Your email</label>
+    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" />
+    <button class="btn btn-blue" id="send">Send my code</button>
+    <div class="err" id="err1"></div>
+  </div>
+
+  <div class="card hidden" id="s2">
+    <b>Enter your 6-digit code</b>
+    <p class="muted" id="sentTo">Check your inbox (and spam folder).</p>
+    <div class="otp" id="otp"><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/></div>
+    <button class="btn btn-blue" id="verify">Sign in</button>
+    <button class="btn btn-line" id="back">← Use a different email</button>
+    <div class="err" id="err2"></div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <span class="muted">New to Trex?</span>
+    <a class="btn btn-line" href="onboarding.html">Create a free account</a>
+  </div>
+</div>
+<script>
+var $=function(i){return document.getElementById(i);};
+var inputs=$("otp").querySelectorAll("input");
+inputs.forEach(function(inp,ix){
+  inp.oninput=function(){ inp.value=inp.value.replace(/\D/g,"").slice(0,1); if(inp.value&&ix<5)inputs[ix+1].focus(); };
+  inp.onkeydown=function(e){ if(e.key==="Backspace"&&!inp.value&&ix>0)inputs[ix-1].focus(); };
+  inp.onpaste=function(e){ var t=(e.clipboardData.getData("text")||"").replace(/\D/g,"").slice(0,6); if(t){ e.preventDefault(); inputs.forEach(function(x,i){x.value=t[i]||"";}); } };
+});
+function code(){ return Array.prototype.map.call(inputs,function(i){return i.value;}).join(""); }
+function nextUrl(){ var n=new URLSearchParams(location.search).get("next")||""; return /^[a-z0-9_-]+\.html$/i.test(n)?n:"dashboard.html"; }
+$("send").onclick=function(){
+  var em=$("email").value.trim().toLowerCase(); $("err1").textContent="";
+  if(em.indexOf("@")<1){ $("err1").textContent="Enter a valid email address."; return; }
+  $("send").disabled=true; $("send").textContent="Sending…";
+  API.post("/otp",{email:em}).then(function(r){
+    $("send").disabled=false; $("send").textContent="Send my code";
+    if(!(r&&r.ok)){ $("err1").textContent=(r&&r.error)||"Couldn't send the code. Try again."; return; }
+    $("s1").classList.add("hidden"); $("s2").classList.remove("hidden"); $("sentTo").textContent="We sent a code to "+em+". Check your inbox and spam folder.";
+    if(r.demo_code){ $("sentTo").textContent+=" (Preview mode: code filled in for you.)"; setTimeout(function(){ inputs.forEach(function(x,i){x.value=r.demo_code[i]||"";}); },700); }
+    inputs[0].focus();
+  }).catch(function(){ $("send").disabled=false; $("send").textContent="Send my code"; $("err1").textContent="No connection. Check your internet and try again."; });
+};
+$("back").onclick=function(){ $("s2").classList.add("hidden"); $("s1").classList.remove("hidden"); };
+$("verify").onclick=function(){
+  var em=$("email").value.trim().toLowerCase(); $("err2").textContent="";
+  if(code().length!==6){ $("err2").textContent="Enter all 6 digits."; return; }
+  API.post("/verify",{email:em,code:code()}).then(function(r){
+    if(!(r&&r.ok&&r.token)){ $("err2").textContent=(r&&r.error)||"That code doesn't match. Try again."; return; }
+    if(r.is_new){ $("err2").textContent=""; alert("We couldn't find a Trex account for this email, so let's create one."); location.href="onboarding.html"; return; }
+    try{ localStorage.setItem("trex_session",r.token); localStorage.setItem("trex_email",r.email); }catch(e){}
+    if(!TREX.profile()){ var cc=r.country||"NG", g=TREX.getCountry(cc)||TREX.getCountry("NG");
+      TREX.saveProfile({countryCode:g.code,localCurrency:g.currency,preferred:g.currency,display:g.currency,enabled:TREX.defaultSet(g.code),favorites:[],confirmed:true,recentPairs:["USD-"+g.currency]}); }
+    TREX.audit("Signed in");
+    location.href=nextUrl();
+  }).catch(function(){ $("err2").textContent="No connection. Check your internet and try again."; });
+};
+</script>
+</body>
+</html>

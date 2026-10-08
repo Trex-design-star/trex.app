@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Trade</title>
+<script src="js/trex.js"></script>
+<script src="js/api.js"></script>
+<script src="js/chat.js"></script>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
+    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;--green:#027A48;--green-soft:#DCFAE6;
+    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:16px 14px 96px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
+  .nav b{letter-spacing:.08em;color:#fff}
+  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600;margin-left:12px}
+  .prev{display:inline-block;font-size:11px;font-weight:700;background:var(--brown-soft);color:var(--brown);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
+  .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;display:inline-block}
+  .b-blue{background:var(--blue-soft);color:var(--blue-dark)}
+  .b-brown{background:var(--brown-soft);color:var(--brown)}
+  .b-red{background:var(--red-soft);color:var(--red)}
+  .b-green{background:var(--green-soft);color:var(--green)}
+  .btn{width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-black{background:var(--black);color:#fff}
+  .btn-line{background:#fff;border:2px solid var(--black);color:var(--black)}
+  .btn.small{width:auto;padding:8px 14px;font-size:13px}
+  .btn:disabled{background:#D0D5DD;color:#fff;cursor:not-allowed}
+  input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px}
+  .offer{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+  #tradeView{display:none}
+  .steps{font-size:13px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;white-space:pre-line}
+  .chat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:80px;margin-top:8px;font-size:14px}
+  .pairchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .modal{position:fixed;inset:0;background:rgba(11,13,18,.5);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:#fff;border-radius:16px 16px 0 0;max-width:680px;width:100%;max-height:80vh;overflow:auto;padding:18px}
+  .receipt{background:#0B0D12;color:#fff;border-radius:12px;padding:14px;font-size:13px;margin-top:10px}
+  .shield{display:inline-block;background:var(--green-soft);color:var(--green);font-weight:800;border-radius:999px;padding:6px 14px;font-size:13px}
+  .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex}
+  .bottomnav a{flex:1;text-align:center;padding:12px 4px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none}
+  .bottomnav a.on{color:var(--blue)}
+  .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;border-radius:999px;padding:10px 18px;font-size:13px;display:none;z-index:30;max-width:90%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><span><a href="dashboard.html">Home</a><a href="settings.html">Settings</a></span></div>
+  <span class="prev">Preview — illustrative reference rates, no real money moves</span>
+
+  <div id="marketView">
+    <div class="card">
+      <b>Find an offer</b>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label>I want to sell</label><select id="sellCur"></select></div>
+        <div><label>I want to receive</label><select id="recvCur"></select></div>
+      </div>
+      <div class="muted" id="pairState"></div>
+      <div class="btnrow"><button class="btn small" id="findBtn">Find offers</button><button class="btn small line" id="watchBtn">☆ Watch this pair</button></div>
+    </div>
+    <div class="card">
+      <div class="row"><b>Offers</b><select id="sort" style="width:auto"><option value="rec">Recommended</option><option value="rate">Best rate</option><option value="cap">Largest capacity</option></select></div>
+      <div class="btnrow" id="freqRow"></div>
+      <div id="offers"></div>
+    </div>
+  </div>
+
+  <div id="tradeView" class="card">
+    <div class="row"><b id="tradeTitle">Trade</b><span id="tradeState" class="badge b-blue">Opened</span></div>
+    <div style="margin:8px 0"><span class="shield" id="shield">🛡 TREX PROTECTION ACTIVE</span></div>
+    <div class="muted" id="tradeMeta"></div>
+    <div class="card" style="background:#F7F4EF;margin:10px 0">
+      <div class="row"><b>Your quote</b><span class="muted" id="quoteTimer"></span></div>
+      <div id="quoteBox" style="font-size:14px"></div>
+      <div class="muted" id="quoteMeta"></div>
+      <button class="btn small line" id="reQuote" style="display:none">Refresh quote</button>
+    </div>
+    <label>Amount you send</label>
+    <input id="amt" type="number" value="500" min="1" />
+    <label>Email for receipt &amp; updates (optional)</label>
+    <input id="temail" type="email" placeholder="you@example.com" />
+    <div class="muted" id="capLine"></div>
+    <label>Payment receipt</label>
+    <input id="proof" placeholder="e.g. receipt.png" />
+    <button class="btn btn-blue" id="btnPay">I've sent payment</button>
+    <button class="btn btn-black" id="btnVendorConfirm" disabled>Confirm payment received</button>
+    <button class="btn btn-blue" id="btnDeliver" disabled>I've sent the currency</button>
+    <button class="btn btn-black" id="btnComplete" disabled>Confirm &amp; complete</button>
+    <div class="row" style="margin-top:8px">
+      <button class="btn btn-line" id="btnDispute" style="width:48%">Report a problem</button>
+      <button class="btn btn-line" id="btnBack" style="width:48%">Back to market</button>
+    </div>
+    <div class="chat" id="chat"><b>Trade chat</b><div id="chatLog" class="muted">This chat is your shared receipt — everything here protects both sides.</div></div>
+    <div id="chatMount" style="display:none;margin-top:8px"></div>
+    <div class="btnrow" id="qaRow">
+      <button class="btn small line" id="qa1">I've sent payment</button>
+      <button class="btn small line" id="qa2">Confirm receipt?</button>
+      <button class="btn small line" id="qa3">I've sent currency</button>
+    </div>
+    <div id="attachRow"><label>Attach a receipt</label>
+    <input id="attach" placeholder="e.g. receipt.png" /></div>
+    <div id="rateBox" style="display:none;margin-top:8px">
+      <label>How was your vendor? (1–5)</label>
+      <select id="rating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+      <button class="btn btn-blue" id="submitRating">Submit rating</button>
+    </div>
+    <div class="receipt" id="receipt" style="display:none"></div>
+  </div>
+</div>
+
+<div class="modal" id="vendorModal"><div class="sheet">
+  <b id="vTitle">Vendor</b><div id="vBody" class="muted"></div>
+  <div style="margin-top:8px"><button class="btn small line" id="vClose">Close</button></div>
+</div></div>
+
+<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html" class="on">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html">Profile</a><a href="more.html">More</a></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+function toast(m){ var t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._x); t._x=setTimeout(function(){t.style.display="none";},2600); }
+function prof(){ var p=TREX.profile(); if(!p){p={countryCode:"NG",localCurrency:"NGN",preferred:"NGN",display:"NGN",enabled:TREX.defaultSet("NG"),favorites:[],confirmed:true,recentPairs:["USD-NGN"]}; TREX.saveProfile(p);} return p; }
+function notify(m){ try{ var n=TREX.load("trex_notes",[]); n.unshift({m:m,at:new Date().toISOString()}); TREX.store("trex_notes",n.slice(0,30)); }catch(e){} toast(m); }
+
+var seedOffers=[
+  {id:"OFR-1",provide:"USD",want:"NGN",rate:1520,rateText:"₦1,520 / $1",min:65,max:330,vendor:"Adaobi • ★4.8 • 312 trades",country:"NG",tier:"Gold",capacity:4000,methods:["Bank transfer"],terms:"Pay within 30 minutes.",live:true,legacy:true,pair:"USD/NGN"},
+  {id:"OFR-2",provide:"GBP",want:"NGN",rate:1940,rateText:"₦1,940 / £1",min:103,max:2060,vendor:"Tunde • ★4.9 • 540 trades",country:"NG",tier:"Gold",capacity:3000,methods:["Bank transfer"],terms:"Pay within 30 minutes.",live:true,legacy:true,pair:"GBP/NGN"},
+  {id:"OFR-3",provide:"EUR",want:"NGN",rate:1650,rateText:"₦1,650 / €1",min:60,max:1500,vendor:"New vendor • ★new • 3 trades",country:"NG",tier:"Probation",capacity:2000,methods:["Bank transfer"],terms:"Pay within 1 hour.",live:true,legacy:true,pair:"EUR/NGN"}
+];
+function allOffers(){ try{ var v=JSON.parse(localStorage.getItem("trex_offers")); if(Array.isArray(v)&&v.length) return v.map(function(o){return TREX.normalizeOffer(o);}); }catch(e){} return seedOffers; }
+function feePct(){ try{ var c=JSON.parse(localStorage.getItem("trex_config"))||{}; return c.fee_pct||(c.fees&&c.fees.pct)||1.5; }catch(e){ return 1.5; } }
+(function serverBoot(){ try{ if(window.API&&API.on){
+  API.get("/offers?all=1").then(function(r){ if(r&&r.ok&&r.offers&&r.offers.length){ try{localStorage.setItem("trex_offers",JSON.stringify(r.offers));}catch(e){} find(); } }).catch(function(){});
+  API.get("/config").then(function(r){ if(r&&r.ok&&r.config){ try{localStorage.setItem("trex_config",JSON.stringify(r.config));}catch(e){} } }).catch(function(){});
+} }catch(e){} })();
+var current=null, quote=null, quoteTimer=null, reserved={};
+
+function matchOffers(sell,recv){
+  return allOffers().filter(function(o){
+    if(o.live===false) return false;
+    var provides=o.provide||(o.pair||"").split("/")[0], wants=o.want||(o.pair||"").split("/")[1];
+    var direct=(provides===recv&&wants===sell);
+    var revLegacy=o.legacy&&(provides===sell&&wants===recv);
+    return direct||revLegacy;
+  });
+}
+function paintFreq(){
+  var p=prof(), row=$("freqRow"); row.innerHTML="";
+  var pairs=(p.recentPairs||[]).slice(0,4);
+  ["USD-EUR","GBP-USD"].forEach(function(k){ if(pairs.indexOf(k)<0)pairs.push(k); });
+  pairs.slice(0,5).forEach(function(k){
+    var a=k.split("-");
+    var b=document.createElement("button"); b.className="pairchip";
+    b.textContent=a[0]+" ↔ "+a[1];
+    b.onclick=function(){ $("sellCur").value=a[0]; $("recvCur").value=a[1]; find(); };
+    row.appendChild(b);
+  });
+}
+function find(){
+  var sell=$("sellCur").value, recv=$("recvCur").value;
+  var st=TREX.pairStatus(sell,recv);
+  if(sell===recv){ $("pairState").textContent="Pick two different currencies."; $("offers").innerHTML=""; return; }
+  if(st==="DISABLED"){ $("pairState").textContent=sell+"/"+recv+" isn't available right now."; $("offers").innerHTML="<p class='muted'>This market is unavailable. Try another pair.</p>"; return; }
+  if(st==="PAUSED"){ $("pairState").textContent="● "+sell+"/"+recv+" is temporarily paused."; $("offers").innerHTML="<p class='muted'>Trading on this pair is paused. Try another pair.</p>"; return; }
+  var ref=TREX.refRate(sell,recv);
+  $("pairState").textContent="Reference: 1 "+sell+" ≈ "+(ref?TREX.fmtMoney(ref,recv):"—")+" (illustrative) • "+st;
+  var list=matchOffers(sell,recv);
+  var sort=$("sort").value;
+  list.sort(function(a,b){
+    if(sort==="rate") return (a.rate-b.rate);
+    if(sort==="cap") return ((b.capacity||0)-(a.capacity||0));
+    var sa=(a.tier==="Gold"?100:0)+(TREX.parseVendor(a.vendor).rating||0)*10;
+    var sb=(b.tier==="Gold"?100:0)+(TREX.parseVendor(b.vendor).rating||0)*10;
+    return sb-sa;
+  });
+  var box=$("offers"); box.innerHTML="";
+  if(!list.length){ box.innerHTML="<p class='muted'>There aren't any matching offers right now. Try swapping direction or another pair — or watch it below.</p>"; return; }
+  list.forEach(function(o,i){
+    var provides=o.provide||o.pair.split("/")[0];
+    var v=TREX.parseVendor(o.vendor);
+    var d=document.createElement("div"); d.className="offer";
+    d.innerHTML="<div class='row'><b>"+sell+" → "+recv+"</b>"
+      +(i===0&&sort==="rec"?"<span class='badge b-green'>Recommended: top-rated vendor</span>":"")
+      +"<span class='badge "+(o.tier==="Gold"?"b-blue":"b-brown")+"'>"+(o.tier==="Gold"?"Top vendor":"New vendor")+"</span></div>"
+      +"<div>Rate: "+(o.rateText||(TREX.fmtMoney(o.rate,o.want||recv)+" per "+provides))+"</div>"
+      +"<div class='muted'>"+(o.photo?("<img src='"+o.photo+"' style='width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle'> "):"")+o.vendor+" • Min "+o.min+" "+provides+" – Max "+o.max+" "+provides+(o.pledge?(" • Replies "+o.pledge):"")+"</div>"
+      +"<div class='muted'>Capacity: "+TREX.fmtMoney(o.capacity||0,provides)+" available • "+(o.methods||["Bank transfer"]).join(", ")+"</div>";
+    var vb=document.createElement("button"); vb.className="btn small line"; vb.textContent="Vendor profile";
+    vb.onclick=function(){ showVendor(o); };
+    var b=document.createElement("button"); b.className="btn btn-blue"; b.textContent="Trade with this vendor";
+    b.onclick=function(){ openTrade(o,sell,recv); };
+    d.append(vb); d.appendChild(b); box.appendChild(d);
+  });
+}
+function showVendor(o){
+  var v=TREX.parseVendor(o.vendor), provides=o.provide||"?";
+  var g=TREX.getCountry(o.vcountry||o.country);
+  $("vTitle").textContent=v.name+(g?" "+g.flag+" "+g.name:"");
+  $("vBody").innerHTML=(o.photo?("<img src='"+o.photo+"' style='width:64px;height:64px;border-radius:50%;object-fit:cover'><br>"):"")
+    +(o.bio?("<b>"+o.bio+"</b><br>"):"")
+    +"Completed trades: "+(v.trades||"just starting")+"<br>Rating: "+(v.rating||"new")+" • History builds with every trade<br>"
+    +"Replies "+(o.pledge||"within minutes")+(o.langs?(" • Speaks "+o.langs):"")+"<br>"
+    +"Capacity: "+TREX.fmtMoney(o.capacity||0,provides)+" available • Min "+o.min+" "+provides+" – Max "+o.max+" "+provides+"<br>"
+    +"Accepts: "+(o.methods||["Bank transfer"]).join(", ")+"<br>Terms: "+(o.terms||"Standard Trex protection terms.");
+  $("vendorModal").style.display="flex";
+}
+$("vClose").onclick=function(){$("vendorModal").style.display="none";};
+$("findBtn").onclick=find; $("sort").onchange=find;
+$("sellCur").onchange=$("recvCur").onchange=function(){};
+$("watchBtn").onclick=function(){
+  var k=$("sellCur").value+"-"+$("recvCur").value, p=prof();
+  p.watch=p.watch||[]; if(p.watch.indexOf(k)<0){p.watch.push(k); TREX.saveProfile(p); toast("⭐ "+k+" added to your watchlist");}
+  else toast("Already watching "+k);
+};
+
+function log(m){ var p=document.createElement("div"); p.textContent=m; $("chatLog").appendChild(p); }
+function setState(s,cls){ $("tradeState").textContent=s; $("tradeState").className="badge "+cls; }
+function startQuote(){
+  var left=30;
+  clearInterval(quoteTimer);
+  function tick(){
+    if(left<=0){ $("quoteTimer").textContent="expired"; $("quoteMeta").textContent="This quote expired — refresh for a live one. Never trade on a stale rate."; $("reQuote").style.display="block"; clearInterval(quoteTimer); return; }
+    $("quoteTimer").textContent="valid 00:"+String(left).padStart(2,"0");
+  }
+  tick(); quoteTimer=setInterval(function(){left--;tick();},1000);
+}
+function refreshQuote(){
+  var cfg=TREX.adminCfg();
+  quote=TREX.quote({send:current.sell,recv:current.recv,amount:Number($("amt").value)||0,feePct:feePct()});
+  if(!quote){ $("quoteBox").textContent="Rate unavailable for this pair right now."; return; }
+  $("quoteBox").innerHTML="You send <b>"+TREX.fmtMoney(quote.amount,quote.send)+"</b><br>Vendor sends <b>"+TREX.fmtMoney(quote.net,quote.recv)+"</b>"
+    +"<br><span class='muted'>Rate 1 "+quote.send+" ≈ "+TREX.fmtMoney(quote.rate,quote.recv)+" • Fee "+TREX.fmtMoney(quote.fee,quote.recv)+" ("+quote.feePct+"%)</span>";
+  $("quoteMeta").textContent="Reference rate, illustrative • quoted just now";
+  $("reQuote").style.display="none"; startQuote();
+}
+$("reQuote").onclick=refreshQuote;
+
+function openTrade(o,sell,recv){
+  var provides=o.provide||o.pair.split("/")[0];
+  var cap=(o.capacity===undefined||o.capacity===null)?10000:o.capacity;
+  var toProvide=function(a){ return (sell===provides)? a : a*(TREX.refRate(sell,provides)||0); };
+  var fromProvide=function(a){ return (sell===provides)? a : a/(TREX.refRate(sell,provides)||1); };
+  var rawAmt=Number($("amt").value)||0;
+  var need=toProvide(rawAmt);
+  if(o.max&&need>o.max){ need=o.max; toast("Above this offer's maximum — adjusted to the max."); }
+  if(o.min&&need<o.min){ need=o.min; }
+  var amt=Math.round(fromProvide(need)*100)/100;
+  var have=(reserved[o.id]!==undefined?reserved[o.id]:cap);
+  if(need>have){ toast("This offer cannot cover that amount right now."); $("capLine").textContent="Vendor has "+TREX.fmtMoney(have,provides)+" available. Try a smaller amount or find another vendor."; return; }
+  function goLocal(){
+    reserved[o.id]=have-need;
+    current={offer:o,sell:sell,recv:recv,amt:amt,ref:"TXN-"+Date.now().toString(36).toUpperCase()};
+    showTrade();
+  }
+  if(window.API&&API.on){
+    API.post("/trades",{offer_id:o.id,sell:sell,recv:recv,amount:need,email:$("temail").value||""},API.key()).then(function(r){
+      if(r&&r.ok){ current={offer:o,sell:sell,recv:recv,amt:amt,ref:r.trade.id,serverId:r.trade.id,state:r.trade.state}; showTrade(); }
+      else toast((r&&r.error)||"Offer unavailable right now.");
+    }).catch(goLocal);
+    return;
+  }
+  goLocal();
+  function showTrade(){
+  var p=prof(); p.recentPairs=p.recentPairs||[]; var k=sell+"-"+recv;
+  p.recentPairs=[k].concat(p.recentPairs.filter(function(x){return x!==k;})).slice(0,6); TREX.saveProfile(p);
+  $("marketView").style.display="none"; $("tradeView").style.display="block";
+  $("tradeTitle").textContent=sell+" → "+recv+" • "+o.vendor.split("•")[0].trim();
+  $("tradeMeta").textContent="Min "+o.min+" "+provides+" • Max "+o.max+" "+provides+" • "+(o.methods||["Bank transfer"]).join(", ");
+  $("amt").value=amt; refreshQuote();
+  $("capLine").textContent="Vendor capacity: "+TREX.fmtMoney(have,provides)+" available • Protection ACTIVE";
+  setState("Trade opened","b-blue");
+  $("chatLog").innerHTML="This chat is your shared receipt — everything here protects both sides.";
+  log("Trade "+current.ref+" opened: "+TREX.fmtMoney(amt,sell)+" → "+recv+".");
+  notify("Your "+sell+" → "+recv+" trade is open. Protection is active.");
+  $("btnPay").disabled=!!(current.serverId&&current.state!=="opened"); $("btnVendorConfirm").disabled=true; $("btnDeliver").disabled=true; $("btnComplete").disabled=true;
+  $("btnVendorConfirm").style.display=current.serverId?"none":""; $("btnDeliver").style.display=current.serverId?"none":"";
+  clearInterval(window._poll); lastSync="";
+  $("chatMount").style.display="none"; $("chat").style.display=""; $("qaRow").style.display=""; $("attachRow").style.display="";
+  if(window._chat){ window._chat.stop(); window._chat=null; }
+  var oc=$("btnCancel"); if(oc) oc.remove();
+  if(current.serverId){
+    $("chat").style.display="none"; $("qaRow").style.display="none"; $("attachRow").style.display="none"; $("chatMount").style.display="block"; $("chatMount").innerHTML="";
+    window._chat=Chat.mount($("chatMount"),current.serverId,{title:"Chat with "+o.vendor.split("•")[0].trim(),quick:["I've sent payment","Please confirm receipt","Thank you!"],onState:syncState});
+    var cb=document.createElement("button"); cb.id="btnCancel"; cb.className="btn btn-line"; cb.textContent="Cancel trade";
+    cb.onclick=function(){ serverAct("cancel",null,function(){ syncState("cancelled"); }); };
+    $("btnBack").parentNode.parentNode.insertBefore(cb,$("btnBack").parentNode.nextSibling);
+    syncState(current.state);
+  }
+  TREX.audit("Trade opened "+current.ref+" "+sell+"→"+recv);
+  }
+}
+var lastSync="";
+function syncState(s){
+  if(!current||!s||s===lastSync) return; lastSync=s;
+  var map={awaiting_vendor:["Waiting for vendor to accept","b-brown"],awaiting_bond:["Vendor is securing the bond","b-brown"],opened:["Accepted — send your payment","b-blue"],payment_sent:["Payment sent","b-blue"],payment_confirmed:["Payment confirmed","b-blue"],delivery_sent:["Delivery sent — please confirm","b-brown"],completed:["Completed","b-green"],cancelled:["Cancelled","b-red"],disputed:["Paused for review","b-red"],resolved:["Resolved","b-blue"]};
+  if(map[s]) setState(map[s][0],map[s][1]);
+  $("btnPay").disabled=(s!=="opened");
+  if(s==="delivery_sent") $("btnComplete").disabled=false;
+  if(["payment_sent","payment_confirmed","delivery_sent","completed","cancelled","disputed","resolved"].indexOf(s)>=0){ var c=$("btnCancel"); if(c) c.style.display="none"; }
+  if(s==="cancelled"||s==="completed"){ $("btnComplete").disabled=true; }
+}
+function serverAct(action,extra,uiFn){
+  if(current&&current.serverId&&window.API&&API.on){
+    var body={id:current.serverId,action:action,proof:$("proof").value||$("attach").value||"",from:"you",vendor:current.offer.vendor,method:(current.offer.methods||[])[0]};
+    if(extra) for(var k in extra) body[k]=extra[k];
+    API.post("/trade_action",body,API.key()).then(function(r){
+      if(r&&r.ok) uiFn(r);
+      else toast((r&&r.error)||"Couldn't reach the server. Nothing was submitted twice — try again.");
+    }).catch(function(){ toast("Couldn't reach the server. Check your connection — nothing was submitted twice."); });
+    return true;
+  }
+  return false;
+}
+$("amt").oninput=function(){ if(current) refreshQuote(); };
+function uiPay(){
+  log("You: payment sent ("+TREX.fmtMoney(Number($("amt").value)||0,current.sell)+"). Receipt: "+$("proof").value);
+  setState("Payment sent","b-blue"); $("btnPay").disabled=true; $("btnVendorConfirm").disabled=false;
+  notify("Your "+current.sell+" payment was marked as received.");
+}
+$("btnPay").onclick=function(){
+  if(!$("proof").value){ alert("Please attach your payment receipt first."); return; }
+  if(!serverAct("pay",null,function(){uiPay();})) uiPay();
+};
+function uiConfirm(){ log("Vendor: payment received — sending your "+current.recv+"."); $("btnVendorConfirm").disabled=true; $("btnDeliver").disabled=false; }
+$("btnVendorConfirm").onclick=function(){ if(!serverAct("confirm",null,function(){uiConfirm();})) uiConfirm(); };
+function uiDeliver(){ log("Vendor: "+current.recv+" sent, receipt attached."); setState("Delivery sent","b-brown"); $("btnDeliver").disabled=true; $("btnComplete").disabled=false; }
+$("btnDeliver").onclick=function(){ if(!serverAct("deliver",null,function(){uiDeliver();})) uiDeliver(); };
+function uiComplete(){
+  $("btnComplete").disabled=true; $("rateBox").style.display="block";
+  setState("Completed","b-green");
+  var q=quote||{};
+  try{ var t=TREX.load("trex_trades",[]); t.push({id:current.ref,pair:current.sell+"-"+current.recv,cur:current.sell,amount:Number($("amt").value)||0,state:"Completed",at:new Date().toISOString()}); TREX.store("trex_trades",t);}catch(e){}
+  TREX.audit("Trade completed "+current.ref);
+  var r=$("receipt"); r.style.display="block";
+  r.innerHTML="<b>TRADE COMPLETE ✓</b><br>Trade "+current.ref+" • "+TREX.localTime()+"<br>"
+    +"You sent "+TREX.fmtMoney(Number($("amt").value)||0,current.sell)+" • You received "+TREX.fmtMoney(q.net||0,current.recv)
+    +"<br>Rate "+(q.rate?TREX.fmtMoney(q.rate,current.recv):"—")+" • Fee "+TREX.fmtMoney(q.fee||0,current.recv)
+    +"<br>Vendor: "+current.offer.vendor+" • Protection: honoured • Ref "+current.ref;
+  log("Trade complete. Receipt above.");
+  notify("Your "+current.sell+" → "+current.recv+" trade is complete.");
+}
+$("btnComplete").onclick=function(){ if(!serverAct("complete",null,function(){uiComplete();})) uiComplete(); };
+function uiDispute(id){
+  setState("Paused for review","b-red");
+  log("Problem reported ("+id+"). Paused — our team reviews chat, receipts and timestamps.");
+  notify("Your "+current.sell+" → "+current.recv+" trade is under review.");
+}
+$("btnDispute").onclick=function(){
+  var d={id:"DSP-"+Date.now().toString(36).toUpperCase(),offer:current.offer.id,pair:current.sell+"-"+current.recv,
+    amount:Number($("amt").value)||0,cur:current.sell,vendor:current.offer.vendor,proof:$("proof").value||$("attach").value||"",
+    rate:current.offer.rate,method:(current.offer.methods||[])[0],chat:$("chatLog").innerText.slice(0,2000),state:"OPEN",at:new Date().toISOString()};
+  if(current.serverId&&window.API&&API.on){
+    var temp=d.id;
+    API.post("/trade_action",{id:current.serverId,action:"dispute",proof:d.proof,from:"you",vendor:d.vendor,method:d.method},API.key()).then(function(r){
+      if(r&&r.ok){ try{var k=TREX.load("trex_disputes",[]);k.push(d);TREX.store("trex_disputes",k);}catch(e){} TREX.audit("Dispute opened "+temp); uiDispute(temp); }
+      else toast((r&&r.error)||"Couldn't reach the server. Try again.");
+    }).catch(function(){ toast("Couldn't reach the server. Check your connection — nothing was submitted twice."); });
+    return;
+  }
+  try{ var k=TREX.load("trex_disputes",[]); k.push(d); TREX.store("trex_disputes",k);}catch(e){}
+  TREX.audit("Dispute opened "+d.id);
+  uiDispute(d.id);
+};
+$("qa1").onclick=function(){log("You: I've sent payment.");};
+$("qa2").onclick=function(){log("You: Please confirm receipt.");};
+$("qa3").onclick=function(){log("Vendor: I've sent the currency.");};
+$("attach").onchange=function(){ if($("attach").value) log("You attached: "+$("attach").value); };
+$("submitRating").onclick=function(){
+  try{ var k=TREX.load("trex_ratings",[]); k.push({trade:current.offer.id,rating:$("rating").value,at:new Date().toISOString()}); TREX.store("trex_ratings",k);}catch(e){}
+  try{ if(window.API&&API.on){ API.post("/ratings",{trade:current.offer.id,rating:$("rating").value}).catch(function(){}); } }catch(e){}
+  toast("Thanks — your rating helps other traders."); $("rateBox").style.display="none";
+};
+$("btnBack").onclick=function(){ clearInterval(quoteTimer); clearInterval(window._poll); if(window._chat){window._chat.stop();window._chat=null;} $("tradeView").style.display="none"; $("marketView").style.display="block"; find(); };
+(function init(){
+  function fill(sel,val){ sel.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.code; sel.appendChild(o); }); sel.value=val; }
+  var q={}; location.search.slice(1).split("&").forEach(function(p){ var kv=p.split("="); if(kv[0])q[kv[0]]=decodeURIComponent(kv[1]||""); });
+  var p=prof();
+  fill($("sellCur"),q.send||p.localCurrency||"NGN"); fill($("recvCur"),q.recv||"USD");
+  if(q.amt) $("amt").value=q.amt;
+  var pr=(p.recentPairs||[])[0]; if(!q.send&&!q.recv&&pr){ var a=pr.split("-"); if(a[0]&&a[1]){$("sellCur").value=a[0];$("recvCur").value=a[1];} }
+  (function freq(){ var row=$("freqRow"); row.innerHTML=""; var pairs=((p.recentPairs||[]).slice(0,3)).concat(["USD-EUR"]); var seen=[];
+    pairs.forEach(function(k){ if(seen.indexOf(k)>=0)return; seen.push(k); var a=k.split("-");
+      var b=document.createElement("button"); b.className="pairchip"; b.textContent=a[0]+" ↔ "+a[1];
+      b.onclick=function(){ $("sellCur").value=a[0]; $("recvCur").value=a[1]; find(); }; row.appendChild(b); }); })();
+  find();
+})();
+</script>
+</body>
+</html>

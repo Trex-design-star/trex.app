@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Trade currencies with people you can trust</title>
+<script src="js/trex.js"></script>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
+    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--green:#12B76A;
+    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 14px 48px}
+  /* ---------- cinematic hero ---------- */
+  .hero{position:relative;border-radius:20px;overflow:hidden;background:#060913;color:#fff;min-height:560px;display:flex;flex-direction:column;justify-content:flex-end}
+  .scene{position:absolute;inset:0;overflow:hidden}
+  .sky{position:absolute;inset:0;background:
+    radial-gradient(900px 420px at 15% 110%, rgba(21,94,239,.45), transparent 60%),
+    radial-gradient(700px 380px at 85% 108%, rgba(242,183,5,.22), transparent 60%),
+    radial-gradient(500px 300px at 50% -10%, rgba(21,94,239,.25), transparent 60%),
+    linear-gradient(180deg,#0A1230 0%,#060913 70%)}
+  .gridlines{position:absolute;inset:0;opacity:.25;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(closest-side at 50% 60%,#000 30%,transparent 100%)}
+  .giant{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;z-index:1;pointer-events:none;user-select:none;overflow:hidden;padding-top:8px}
+  .giant span{font-size:clamp(64px,17vw,168px);font-weight:900;letter-spacing:.02em;line-height:1.1;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.18);animation:lit 4s ease-in-out infinite}
+  .giant span:nth-child(2){animation-delay:.5s}
+  .giant span:nth-child(3){animation-delay:1s}
+  .giant span:nth-child(4){animation-delay:1.5s}
+  @keyframes lit{0%,100%{color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.16);transform:scale(1);text-shadow:none}25%{color:#155EEF;-webkit-text-stroke:2px #7AA5FF;transform:scale(1.22);text-shadow:0 0 46px rgba(21,94,239,.95),0 0 90px rgba(21,94,239,.5)}55%{color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.16);transform:scale(1);text-shadow:none}}
+  .node{position:absolute;bottom:120px;text-align:center;transition:opacity .6s, transform .6s;z-index:2}
+  .node .avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:#141B2E;border:2px solid rgba(255,255,255,.25);margin:0 auto}
+  .node small{display:block;margin-top:6px;font-size:11px;color:#C7CBD1}
+  .node b{font-size:13px}
+  #nodeA{left:8%}
+  #nodeB{right:8%}
+  .node.dim{opacity:.45}
+  .node.lit .avatar{border-color:var(--green);box-shadow:0 0 24px rgba(18,183,106,.7)}
+  .pulse{position:absolute;width:64px;height:64px;border-radius:50%;border:2px solid var(--blue);left:50%;top:0;transform:translateX(-50%);opacity:0;pointer-events:none}
+  .node.searching .pulse{animation:ping 1.6s ease-out infinite}
+  @keyframes ping{0%{transform:translateX(-50%) scale(.6);opacity:.9}100%{transform:translateX(-50%) scale(1.8);opacity:0}}
+  #route{position:absolute;inset:0;width:100%;height:100%}
+  #routePath{fill:none;stroke:rgba(255,255,255,.35);stroke-width:2;stroke-dasharray:6 8}
+  #routeGlow{fill:none;stroke:var(--blue);stroke-width:3;opacity:0;filter:drop-shadow(0 0 6px #155EEF)}
+  .coin{position:absolute;font-weight:800;color:#F2B705;text-shadow:0 0 12px rgba(242,183,5,.8);opacity:0;font-size:18px}
+  .coin.fly{animation:fly 2.2s linear forwards}
+  @keyframes fly{0%{opacity:0;transform:translate(0,0) scale(.8)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1)}}
+  #shieldWrap{position:absolute;left:50%;bottom:170px;transform:translateX(-50%) scale(.5);opacity:0;transition:all .6s;text-align:center}
+  #shieldWrap.on{opacity:1;transform:translateX(-50%) scale(1)}
+  #shieldWrap .ring{width:74px;height:74px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:32px;background:rgba(18,183,106,.15);border:2px solid var(--green);box-shadow:0 0 30px rgba(18,183,106,.6);animation:shieldPulse 2s ease-in-out infinite}
+  @keyframes shieldPulse{0%,100%{box-shadow:0 0 18px rgba(18,183,106,.4)}50%{box-shadow:0 0 38px rgba(18,183,106,.8)}}
+  #burst{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);font-size:15px;font-weight:800;color:#fff;background:var(--green);border-radius:999px;padding:8px 18px;opacity:0;transition:opacity .5s;white-space:nowrap}
+  #burst.on{opacity:1}
+  .caption{position:relative;z-index:3;text-align:center;padding:0 20px;margin-bottom:8px;min-height:52px}
+  .caption small{letter-spacing:.14em;color:#9AA0AA;font-size:11px}
+  .caption h2{margin:6px 0 0;font-size:21px;line-height:1.3}
+  .dots{position:relative;z-index:3;display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+  .dots i{width:22px;height:4px;border-radius:4px;background:rgba(255,255,255,.25)}
+  .dots i.on{background:#fff}
+  /* ---------- floating trade card ---------- */
+  .trade-card{position:relative;z-index:4;background:rgba(255,255,255,.97);color:var(--ink);border-radius:16px;margin:0 14px 16px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .trade-card .status{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:5px 12px;background:var(--blue-soft);color:var(--blue-dark)}
+  .trade-card .status.ok{background:#DCFAE6;color:#027A48}
+  .trow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}
+  .trow .lab{font-size:12px;color:var(--muted)}
+  .trow .val{font-size:20px;font-weight:800}
+  .trow select,.trow input{width:auto;max-width:130px;padding:8px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-weight:700}
+  .vrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#ccc;display:inline-block;margin-right:6px}
+  .dot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .cta{display:block;text-align:center;background:var(--blue);color:#fff;font-weight:800;border-radius:12px;padding:14px;margin-top:12px;text-decoration:none}
+  /* ---------- page body ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;display:inline-block}
+  .b-blue{background:var(--blue-soft);color:var(--blue-dark)}
+  .b-brown{background:var(--brown-soft);color:var(--brown)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat b{font-size:20px}
+  .pair{background:var(--black);color:#fff;border-radius:10px;padding:10px;font-size:14px;margin:6px 0}
+  .btn{display:block;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;text-align:center;margin-top:10px;text-decoration:none;cursor:pointer}
+  .btn-blue{background:var(--blue);color:#fff}
+  .foot{text-align:center}
+  .foot a{color:var(--blue);text-decoration:none;font-weight:600}
+  @media (prefers-reduced-motion:reduce){.coin,.pulse,#shieldWrap .ring,.giant span{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- CINEMATIC HERO -->
+  <div class="hero" id="hero">
+    <div class="scene" aria-hidden="true">
+      <div class="sky"></div><div class="gridlines"></div>
+      <div class="giant" aria-hidden="true"><span>T</span><span>R</span><span>E</span><span>X</span></div>
+      <svg id="route" viewBox="0 0 600 400" preserveAspectRatio="none">
+        <path id="routePath" d="M90,280 C220,180 380,180 510,280"/>
+        <path id="routeGlow" d="M90,280 C220,180 380,180 510,280"/>
+      </svg>
+      <div class="node dim" id="nodeA"><div style="position:relative"><div class="avatar">🇳🇬</div><div class="pulse"></div></div><b>Ada • Lagos</b><small>needs $328.95</small></div>
+      <div class="node dim" id="nodeB"><div class="avatar">✓</div><b>Verified vendor</b><small>312 trades • 4.8★</small></div>
+      <div id="shieldWrap"><div class="ring">🛡</div><small style="color:#fff;font-weight:700">Bond-backed</small></div>
+      <div id="burst">✓ ₦500,000 → $328.95 complete</div>
+    </div>
+    <div class="caption">
+      <small id="capKicker">TREX • PROTECTED GLOBAL MARKETPLACE</small>
+      <h2 id="capTitle">Trade currencies with people you can trust.</h2>
+    </div>
+    <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i></div>
+    <!-- FLOATING TRANSACTION CARD -->
+    <div class="trade-card">
+      <span class="status" id="cardStatus">Searching for a vendor…</span>
+      <div class="trow"><div><div class="lab">You pay</div><div class="val" id="payVal">₦500,000</div></div>
+        <select id="payCur" aria-label="Pay currency"></select></div>
+      <div class="trow"><div><div class="lab">You receive</div><div class="val" id="getVal">$328.95</div></div>
+        <select id="getCur" aria-label="Receive currency"></select></div>
+      <div class="muted" id="rateLine">Rate ₦1,520 / $1 • fee shown before you confirm</div>
+      <div class="vrow"><span><span class="dot" id="vDot"></span><b id="vName">Finding a verified vendor…</b></span><span class="muted" id="vMeta"></span></div>
+      <div class="vrow"><span>🛡 <b>Protected trade</b></span><span class="muted" id="protState">activating…</span></div>
+      <a class="cta" id="startTrade" href="onboarding.html">Start a Trade →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge b-blue">How Trex works</span>
+    <h3>People, currencies and protection — in one flow</h3>
+    <p><b>1. You pick a pair.</b> Any supported currencies — your local one is there waiting, plus USD, GBP and EUR.</p>
+    <p><b>2. A bonded vendor responds.</b> Every vendor backs trades with a refundable deposit. No bond, no trade.</p>
+    <p><b>3. Protection activates.</b> Both sides attach proof in the trade chat. Nothing completes on words alone.</p>
+    <p><b>4. Currency is delivered.</b> Confirm receipt — or report a problem and our team reviews the full evidence, usually within 24 hours.</p>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><b>≥97%</b><br><span class="muted">dispute-free trades</span></div>
+    <div class="stat"><b>≤45 min</b><br><span class="muted">payment → complete</span></div>
+    <div class="stat"><b>24 hrs</b><br><span class="muted">review turnaround</span></div>
+    <div class="stat"><b>40+</b><br><span class="muted">currencies supported</span></div>
+  </div>
+
+  <div class="card">
+    <span class="badge b-brown">Live markets</span>
+    <div class="pair">USD ↔ NGN • 🇺🇸 ⇄ 🇳🇬 • from top-rated vendors</div>
+    <div class="pair">GBP ↔ USD • 🇬🇧 ⇄ 🇺🇸 • deep liquidity</div>
+    <div class="pair">EUR ↔ USD • 🇪🇺 ⇄ 🇺🇸 • tight spreads</div>
+    <div class="pair">KES • JPY • GHS • ZAR • +35 more • add any currency after signup</div>
+    <a class="btn btn-blue" href="trade.html">Browse the market</a>
+  </div>
+
+  <div class="card">
+    <b>Why traders trust Trex</b>
+    <p class="muted">Verified vendors with public records — completed trades, completion rate, response time and protection capacity. Your money is never a leap of faith.</p>
+  </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* ---- live card ---- */
+  function fill(sel,val){ sel.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.code; sel.appendChild(o); }); sel.value=val; }
+  var payCur=document.getElementById("payCur"), getCur=document.getElementById("getCur");
+  fill(payCur,"NGN"); fill(getCur,"USD");
+  var AMOUNT=500000;
+  function recompute(){
+    var s=payCur.value, r=getCur.value, ref=TREX.refRate(s,r);
+    if(!ref||s===r){ document.getElementById("getVal").textContent="—"; return; }
+    var net=AMOUNT*ref;
+    document.getElementById("payVal").textContent=TREX.fmt(AMOUNT,s);
+    document.getElementById("getVal").textContent=TREX.fmt(net,r);
+    document.getElementById("rateLine").textContent="Rate "+TREX.fmtMoney(1,s)+" ≈ "+TREX.fmtMoney(ref,r)+" • fee shown before you confirm";
+    document.getElementById("startTrade").href="onboarding.html";
+  }
+  payCur.onchange=getCur.onchange=recompute; recompute();
+
+  /* ---- cinematic timeline ---- */
+  var nodeA=document.getElementById("nodeA"), nodeB=document.getElementById("nodeB"),
+      glow=document.getElementById("routeGlow"), shield=document.getElementById("shieldWrap"),
+      burst=document.getElementById("burst"), scene=document.querySelector(".scene"),
+      capTitle=document.getElementById("capTitle"), dots=document.querySelectorAll("#dots i"),
+      cardStatus=document.getElementById("cardStatus"), vDot=document.getElementById("vDot"),
+      vName=document.getElementById("vName"), vMeta=document.getElementById("vMeta"),
+      prot=document.getElementById("protState");
+  var STAGES=[
+    {t:"Ada in Lagos needs dollars.", s:"Searching for a vendor…", d:2200},
+    {t:"Verified vendor found — 312 trades, 4.8★.", s:"Vendor found ✓", d:2200},
+    {t:"Protection active — this trade is bond-backed.", s:"Protected ✓", d:2400},
+    {t:"Payment made and verified by both sides.", s:"Payment confirmed", d:2400},
+    {t:"Currency delivered. Trade complete.", s:"Completed ✓", d:2400}
+  ];
+  function setStage(i){
+    dots.forEach(function(d,j){ d.className=j===i?"on":""; });
+    capTitle.textContent=STAGES[i].t;
+    cardStatus.textContent=STAGES[i].s;
+    cardStatus.className="status"+((i===2||i===4)?" ok":"");
+    nodeA.className="node"+(i===0?" searching":i>=1?" lit":" dim");
+    nodeB.className="node"+(i>=1?" lit":" dim");
+    glow.style.opacity=i>=1?"1":"0";
+    glow.style.transition="opacity .8s";
+    if(i>=2){shield.classList.add("on"); prot.textContent="bond-backed ✓";} else {shield.classList.remove("on"); prot.textContent="activating…";}
+    if(i>=1){vDot.className="dot on"; vName.textContent="Adaobi • Verified vendor"; vMeta.textContent="312 trades • 4.8★ • Available";}
+    else {vDot.className="dot"; vName.textContent="Finding a verified vendor…"; vMeta.textContent="";}
+    burst.className=i===4?"on":"";
+  }
+  function coins(n){
+    if(reduce||document.hidden) return;
+    var syms=["₦","$","€","£","₦","$"];
+    for(var k=0;k<n;k++){
+      (function(k){
+        setTimeout(function(){
+          var s=document.createElement("span"); s.className="coin"; s.textContent=syms[k%syms.length];
+          s.style.left=(18+Math.random()*20)+"%"; s.style.bottom="150px";
+          s.style.setProperty("--dx",(220+Math.random()*120)+"px"); s.style.setProperty("--dy",(-60-Math.random()*60)+"px");
+          scene.appendChild(s);
+          void s.offsetWidth; s.classList.add("fly");
+          setTimeout(function(){s.remove();},2400);
+        },k*350);
+      })(k);
+    }
+  }
+  var idx=0;
+  function loop(){
+    setStage(idx);
+    if(idx===3) coins(6);
+    if(idx===4) coins(4);
+    setTimeout(function(){ idx=(idx+1)%STAGES.length; if(!document.hidden||idx!==0) loop(); else setTimeout(loop,1000); }, STAGES[idx].d);
+  }
+  if(reduce){ setStage(2); } else loop();
+})();
+</script>
+</body>
+</html>

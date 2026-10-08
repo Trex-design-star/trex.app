@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Trust &amp; safety checks</title>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
+    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;
+    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 14px 48px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
+  .nav b{letter-spacing:.08em;color:#fff}
+  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600}
+  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+  label{font-size:13px;font-weight:700;display:block;margin:10px 0 4px}
+  input{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:14px}
+  .btn{width:100%;border:0;border-radius:12px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-black{background:var(--black);color:#fff}
+  .item{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX OPERATIONS</b><span><a href="index.html">Storefront</a> • <a href="more.html">All pages</a></span></div>
+  <div class="top">
+    <h2 style="margin:0 0 6px">Trust &amp; safety checks</h2>
+    <div class="muted" style="color:#C7CBD1">Ranking, fair pricing, safe chats and fraud detection</div>
+  </div>
+
+  <div class="card">
+    <b>How offers are ranked</b>
+    <p class="muted">Top vendors with clean records always appear first. New vendors earn their way up.</p>
+    <button class="btn btn-black" id="rank">Rank current vendors</button>
+    <div id="rankOut"></div>
+  </div>
+
+  <div class="card">
+    <b>Fair-price check</b>
+    <p class="muted">Offers priced far from the market rate are paused for review. Market reference: USD 1520, GBP 1940, EUR 1650.</p>
+    <label>Offered naira per $1</label><input id="guardRate" type="number" value="1700">
+    <button class="btn btn-blue" id="guard">Check this rate</button>
+    <div class="muted" id="guardOut"></div>
+  </div>
+
+  <div class="card">
+    <b>Chat safety</b>
+    <p class="muted">Trades taken off Trex lose bond protection, so contact details are held for review.</p>
+    <label>Test a message</label><input id="chatTest" value="chat me on whatsapp 0803...">
+    <button class="btn btn-black" id="chatCheck">Scan message</button>
+    <div class="muted" id="chatOut"></div>
+    <label>Keep chat history (days after completion)</label><input id="ret" type="number" value="90">
+  </div>
+
+  <div class="card">
+    <b>Standards &amp; fraud</b>
+    <p class="muted">Repeated false claims lead to warnings, then suspension. Vendors averaging below 3 stars are reviewed and paused.</p>
+    <label>Vendor average rating</label><input id="avgR" type="number" value="2.4" step="0.1">
+    <button class="btn btn-blue" id="revCheck">Evaluate vendor</button>
+    <div class="muted" id="revOut"></div>
+    <button class="btn btn-black" id="fraud">Run fraud scan</button>
+    <div id="fraudOut" class="mono"></div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+$("rank").onclick=()=>{
+  const offers=[{v:"Tunde — 4.9, 540 trades",s:95},{v:"Adaobi — 4.8, 312 trades",s:92},{v:"New vendor — under review",s:40}].sort((a,b)=>b.s-a.s);
+  $("rankOut").innerHTML=offers.map((o,i)=>`<div class="item">#${i+1} ${o.v}</div>`).join("");
+};
+$("guard").onclick=()=>{
+  const r=Number($("guardRate").value), dev=(r-1520)/1520*100;
+  $("guardOut").textContent=Math.abs(dev)>8?`Paused for review: ${dev.toFixed(1)}% away from the market rate.`:`Looks fair: ${dev.toFixed(1)}% from the market rate.`;
+};
+$("chatCheck").onclick=()=>{
+  const m=$("chatTest").value.toLowerCase();
+  const hit=/(whatsapp|telegram|\+?\d{10,}|@[a-z0-9_.]+|phone)/.test(m);
+  $("chatOut").textContent=hit?"Held for review — both sides are told why. Off-Trex deals are not protected.":"Message delivered.";
+};
+$("revCheck").onclick=()=>{
+  const a=Number($("avgR").value);
+  $("revOut").textContent=a<3?"Vendor paused for review until the team checks in.":"Vendor standing is good.";
+};
+$("fraud").onclick=()=>{
+  $("fraudOut").textContent="• 3 disputes share one device → flagged\n• Offer 22% below market → flagged\n• 5 accounts in 10 minutes from one network → flagged\n• New account trading maximum limits instantly → flagged";
+};
+</script>
+</body>
+</html>

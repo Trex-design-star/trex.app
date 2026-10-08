@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — All pages</title>
+<style>
+  :root{--black:#0B0D12;--blue:#155EEF;--ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 14px 96px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
+  .nav b{letter-spacing:.08em;color:#fff}
+  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600}
+  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;border-bottom:1px solid var(--line);font-size:15px}
+  .item:last-child{border-bottom:0}
+  .item a{color:var(--blue);font-weight:700;text-decoration:none}
+  .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex}
+  .bottomnav a{flex:1;text-align:center;padding:12px 2px;font-size:11px;font-weight:700;color:var(--muted);text-decoration:none}
+  .bottomnav a.on{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><a href="index.html">Home</a></div>
+  <div class="top"><h2 style="margin:0 0 6px">Every page in Trex</h2>
+  <div class="muted" style="color:#C7CBD1">Customers, vendors and the Trex team — everything reachable from here.</div></div>
+
+  <div class="card"><b>👋 Start here</b>
+    <div class="item"><span><b>Landing</b><br><span class="muted">What Trex is and how protection works</span></span><a href="index.html">Open →</a></div>
+    <div class="item"><span><b>Sign in</b><br><span class="muted">Already have an account? Email code, no password</span></span><a href="signin.html">Open →</a></div>
+    <div class="item"><span><b>Create account</b><br><span class="muted">Phone, country, email, security, vendor signup</span></span><a href="onboarding.html">Open →</a></div>
+    <div class="item"><span><b>Dashboard</b><br><span class="muted">Balances, converter, pairs, transactions</span></span><a href="dashboard.html">Open →</a></div>
+  </div>
+
+  <div class="card"><b>💱 Trading</b>
+    <div class="item"><span><b>Trade &amp; markets</b><br><span class="muted">Global marketplace and protected trade room</span></span><a href="trade.html">Open →</a></div>
+    <div class="item"><span><b>Settings, security &amp; support</b><br><span class="muted">Country, currencies, security centre, tickets</span></span><a href="settings.html">Open →</a></div>
+  </div>
+
+  <div class="card"><b>🏪 Selling</b>
+    <div class="item"><span><b>Become a vendor — start here</b><br><span class="muted">What vending means, the 50% rule, do's and don'ts</span></span><a href="vendor.html">Open →</a></div>
+    <div class="item"><span><b>Your offers</b><br><span class="muted">Build any pair, set rates and limits</span></span><a href="offers.html">Open →</a></div>
+    <div class="item"><span><b>Your protection (bond)</b><br><span class="muted">50% per-trade bond, top-up, withdraw</span></span><a href="bond.html">Open →</a></div>
+  </div>
+
+  <div class="card"><b>🛡 Operations (Trex team)</b>
+    <div class="item"><span><b>Operations centre</b><br><span class="muted">Markets, currencies, rates, reviews, vendors</span></span><a href="admin.html">Open →</a></div>
+    <div class="item"><span><b>Trust &amp; safety checks</b><br><span class="muted">Ranking, fair pricing, fraud scans</span></span><a href="automation.html">Open →</a></div>
+    <div class="item"><span><b>Growth &amp; new markets</b><br><span class="muted">New pairs, business access, invites</span></span><a href="expansion.html">Open →</a></div>
+    <div class="item"><span><b>Launch checklist</b><br><span class="muted">Go-live gates before public launch</span></span><a href="launch.html">Open →</a></div>
+  </div>
+
+  <div class="card"><b>🎨 Brand</b>
+    <div class="item"><span><b>Brand sheet</b><br><span class="muted">Colours, type, buttons, inputs</span></span><a href="design.html">Open →</a></div>
+  </div>
+</div>
+<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html">Profile</a><a href="more.html" class="on">More</a></nav>
+</body>
+</html>

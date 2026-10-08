@@ -1,0 +1,50 @@
+[
+  {
+    "id": "evt_b201a40163e6",
+    "kind": "reserve",
+    "trade": "TXN-D4196770",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-01T16:24:34Z"
+  },
+  {
+    "id": "evt_bbd05a47ba7e",
+    "kind": "refund",
+    "trade": "TXN-D4196770",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-01T16:24:40Z"
+  },
+  {
+    "id": "evt_467c89ede891",
+    "kind": "reserve",
+    "trade": "TXN-F33E82CE",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-01T18:10:15Z"
+  },
+  {
+    "id": "evt_6394c40d97b0",
+    "kind": "release",
+    "trade": "TXN-F33E82CE",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-01T18:10:29Z"
+  },
+  {
+    "id": "evt_37a6b512876e",
+    "kind": "reserve",
+    "trade": "TXN-0920756A",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-04T14:20:37Z"
+  },
+  {
+    "id": "evt_e7244679569f",
+    "kind": "refund",
+    "trade": "TXN-0920756A",
+    "amount": 100.0,
+    "ccy": "USD",
+    "at": "2026-10-04T14:20:37Z"
+  }
+]
