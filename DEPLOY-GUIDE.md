@@ -1,56 +1,43 @@
-# Trex — deploy guide for beginners (start to finish)
+# Trex — production deploy guide (beginner, start to finish)
 
-You already have: a GitHub repository linked to Netlify, and a Neon account. Follow the parts in order.
+## Part 1 — Clean your GitHub repository
+1. Open your repository on github.com. Its top level must contain: the `.html` files, folders `css`, `js`, `netlify`, plus `netlify.toml` and `package.json`.
+2. Delete anything else left over from older versions: `expansion.html`, `launch.html`, `api.rb`, `schema.sql`, `docker-compose.yml`, and the folders `data`, `bin`, `tests`. (Click the file > three dots > Delete file > Commit changes.)
+3. Upload the new files: Add file > Upload files > drag in everything inside the zip's `Exchange-platform-project` folder (not the folder itself) > Commit changes.
 
-## Part 1 — Clean your GitHub repository (3 minutes)
-1. Open your repository on github.com.
-2. The repository must contain these at its top level: all the .html files, `js` folder, `netlify` folder, `netlify.toml`, `package.json`.
-3. If you see folders called `data`, `tests` or `bin`: click each one, click the three dots (top right) > Delete directory > Commit changes. They are not needed online.
-4. Upload the newest files: Add file > Upload files > drag the contents of the new zip's `Exchange-platform-project` folder (not the folder itself) > Commit changes.
+## Part 2 — Database address (Neon)
+1. neon.tech > your project > **Connect**. Turn **Connection pooling OFF** (important). Copy the text starting with `postgres://`.
 
-## Part 2 — Get your database address from Neon (3 minutes)
-1. Log in at neon.tech and open your project.
-2. Click **Connect** (or "Connection details").
-3. Find the switch called **Connection pooling** and turn it **OFF**. This matters.
-4. Copy the long text starting with `postgres://`. Keep it for Part 4.
+## Part 3 — Email sender (Gmail)
+1. Make a Gmail only for Trex. Turn on 2-Step Verification (myaccount.google.com > Security).
+2. Search "App passwords" in that page, create one named Trex, copy the 16 letters.
 
-## Part 3 — Create your email sender with Gmail (5 minutes, no domain needed)
-1. Create a new Gmail just for Trex (for example trexapp@gmail.com) and log in.
-2. Go to myaccount.google.com > Security > turn on **2-Step Verification**.
-3. In the search box at the top of that page type **App passwords** and open it.
-4. Name it "Trex" > Create. Google shows a 16-letter password. Copy it (spaces are fine).
-Limit: Gmail sends up to 500 emails a day. Codes can land in spam the first times, so tell users to check spam.
+## Part 4 — Settings in Netlify
+Site configuration > Environment variables > Add a variable. Add each (tick "Contains secret values" on the three secret ones):
+- DATABASE_URL (secret) = Neon text
+- ADMIN_EMAILS = your own email
+- GMAIL_USER = your Trex Gmail
+- GMAIL_APP_PASSWORD (secret) = the 16 letters
+- PAYSTACK_SECRET_KEY (secret) = your LIVE secret key (Paystack > Settings > API Keys & Webhooks)
+- PAYSTACK_BANK = access-bank
 
-## Part 4 — Add your settings in Netlify (5 minutes)
-1. Log in at netlify.com > click your site > **Site configuration** > **Environment variables**.
-2. Click **Add a variable** > "Add a single variable". Add each of these (name on the left, value on the right):
-   - DATABASE_URL = the Neon text from Part 2
-   - ADMIN_EMAILS = your own email address
-   - GMAIL_USER = your Trex Gmail address
-   - GMAIL_APP_PASSWORD = the 16-letter password from Part 3
-   - PAYSTACK_SECRET_KEY = from Paystack dashboard > Settings > API Keys & Webhooks > Test Secret Key
-   - PAYSTACK_BANK = test-bank
-3. Click Save after each one.
+## Part 5 — Deploy
+Deploys > Trigger deploy > **Clear cache and deploy site**. Wait for "Published". If it says "Failed", send me the red text.
 
-## Part 5 — Deploy (2 minutes)
-1. In Netlify click **Deploys** > **Trigger deploy** > **Clear cache and deploy site**.
-2. Wait until it says **Published** (about 1-2 minutes). If it says "Failed", click it, copy the red text and send it to me.
+## Part 6 — Tell Paystack where to send news
+Paystack > Settings > API Keys & Webhooks > **Live Webhook URL**: `https://YOURSITE.netlify.app/api/paystack/webhook` > Save.
 
-## Part 6 — Tell Paystack where to send news (2 minutes)
-1. Paystack dashboard > Settings > API Keys & Webhooks.
-2. In **Test Webhook URL** paste: https://YOURSITE.netlify.app/api/paystack/webhook (use your real Netlify address) > Save.
+## Part 7 — Check everything (this replaces the old step that failed)
+1. Open `https://YOURSITE.netlify.app/api/health`. You should see `"database":"postgres"`, `"auth":"better-auth"`, `"email":"gmail"`, `"paystack":true`.
+2. On your site click **Create account** and sign up with the email you put in ADMIN_EMAILS (name, email, password, email code, face check).
+3. Open `https://YOURSITE.netlify.app/admin.html` > **System check** tab > **Run system check**. Every line must have a green tick. (Opening `/api/authcheck` directly in the address bar also works now after you have signed in.)
+   Why the old step failed: typing a link in the address bar does not carry your login. It is fixed in two ways: the site now keeps a secure sign-in cookie, and the System check button sends your login for you.
 
-## Part 7 — Check everything works (5 minutes)
-1. Open https://YOURSITE.netlify.app/api/health. You must see: "database":"postgres", "auth":"better-auth", "email":"gmail".
-2. Open your site > Sign in > use your admin email > enter the code from your email.
-3. Open https://YOURSITE.netlify.app/api/authcheck — every line must show "ok":true.
-4. Open https://YOURSITE.netlify.app/admin.html — you should see the operations centre.
+## Part 8 — Your first real-money test (small amounts!)
+1. Make a second account (vendor) and a third (customer) with different emails and faces/selfies. If a face check says "under review", approve it in admin.html > Reviews.
+2. Vendor: Become a vendor > fill the profile > publish an offer > Protection (bond) > save payout account > "Show my deposit account".
+3. Customer: Trade > pick the offer > request a small trade. Vendor accepts, deposits the shown bond amount to the deposit account, then the trade starts automatically.
+4. Finish the trade and check that the bond returns to the vendor's bank. Tell me what you see at each step.
 
-## Part 8 — Your test-mode run (Paystack test money)
-1. Sign up as a vendor with a second email (do the face check).
-2. Bond page > choose bank + account number > Save payout account. Press "Show my deposit account".
-3. Make a customer account (third email), open a trade with your vendor, then as the vendor press Accept. You are sent to the bond page.
-4. In Paystack test mode, send a test transfer to the deposit account number shown, and tell me what happens.
-
-## How the face check works
-When someone signs up, the page opens the phone camera and asks for three random moves (for example: turn left, smile, blink). It measures real movement on the live video, so a still photo is rejected. It saves three small pictures and a numeric "fingerprint" of the face. If another account has almost the same fingerprint, the account is marked for review: customers can still trade, vendors cannot publish offers until you click "Clear" on the admin page. If the camera is blocked, the person can upload a selfie instead and that account also goes to review. This is a deterrent, not bank-grade ID verification.
+## Face check notes
+The face check loads a face-recognition library from the internet (jsdelivr). If it can't load, the user's face check goes to "under review" and you approve it in admin.html > Reviews. To remove the internet dependency later, put the face-api model files in a `models` folder in your repository.

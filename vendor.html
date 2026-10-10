@@ -59,7 +59,6 @@
 <body>
 <div class="wrap">
   <div class="nav"><b>TREX</b><span><a href="index.html">Home</a><a href="trade.html">Trade</a></span></div>
-  <span class="prev">Preview — sample figures, no real money moves</span>
 
   <div class="scene" aria-hidden="false">
     <div class="blob b1"></div><div class="blob b2"></div>
@@ -129,9 +128,24 @@
 
   <div class="card">
     <span class="badge b-green">What you earn</span>
-    <p>Your spread on every swap, a public rating that brings more orders, and higher limits as your record grows. Top vendors fill hundreds of orders a month.</p>
+    <p>Your spread on every swap, a public rating that brings more orders, and higher limits as your record grows. Higher limits and more orders follow as your record grows.</p>
   </div>
 </div>
-<div class="cta"><a href="offers.html">Create your vendor profile →</a></div>
+<div class="cta"><a href="#" id="becomeBtn">Become a vendor →</a></div>
+<div id="vm" style="display:none;position:fixed;inset:0;background:rgba(11,13,18,.6);z-index:50;align-items:flex-end;justify-content:center"><div style="background:#fff;max-width:680px;width:100%;border-radius:16px 16px 0 0;padding:18px;max-height:90vh;overflow:auto">
+<b style="font-size:18px">Activate your vendor account</b><p class="muted">You'll need a completed face check, your phone number (for your bank deposit account) and to accept the rules.</p>
+<label style="font-weight:700;font-size:13px">Phone number</label><input id="vph" inputmode="tel" placeholder="+234…" style="width:100%;padding:12px;border:1.5px solid #E4E0D6;border-radius:10px;font-size:15px">
+<label style="display:flex;gap:8px;margin:12px 0;font-size:14px"><input type="checkbox" id="vacc" style="width:auto"> I accept the 50% bond rule, the do's and don'ts, and Trex's fault rules.</label>
+<div id="verr" style="color:#D92D20;font-size:13px;min-height:16px"></div>
+<button id="vgo" style="width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:#155EEF;color:#fff;cursor:pointer;margin-top:8px">Activate</button>
+<button id="vx" style="width:100%;border:2px solid #0B0D12;border-radius:12px;padding:12px;font-size:15px;font-weight:700;background:#fff;color:#0B0D12;cursor:pointer;margin-top:8px">Not now</button></div></div>
+<script src="js/api.js"></script><script src="js/app.js"></script>
+<script>
+var $=function(i){return document.getElementById(i);};
+TREXAPP.ready(function(me){ if(me.vendor){ $("becomeBtn").textContent="Open vendor dashboard →"; $("becomeBtn").href="vendor-dashboard.html"; } });
+$("becomeBtn").onclick=function(e){ var me=TREXAPP.me(); if(me&&me.vendor)return; e.preventDefault(); $("vm").style.display="flex"; };
+$("vx").onclick=function(){ $("vm").style.display="none"; };
+$("vgo").onclick=function(){ $("verr").textContent=""; API.post("/vendor/enable",{accept:$("vacc").checked,phone:$("vph").value}).then(function(r){ if(r&&r.ok){ location.href="offers.html"; } else if(r&&r.need_live){ $("verr").innerHTML="Finish your face check first: <a href='settings.html'>Settings → Security</a>."; } else $("verr").textContent=(r&&r.error)||"Couldn't activate."; }); };
+</script>
 </body>
 </html>

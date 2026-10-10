@@ -1,250 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Trex Operations</title>
-<script src="js/trex.js"></script>
-<script src="js/api.js"></script>
-<style>
-  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
-    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;--green:#027A48;--green-soft:#DCFAE6;
-    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:760px;margin:0 auto;padding:16px 14px 48px}
-  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
-  .nav b{letter-spacing:.08em;color:#fff}
-  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600}
-  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
-  .muted{color:var(--muted);font-size:13px}
-  .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
-  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
-  .b-blue{background:var(--blue-soft);color:var(--blue-dark)}
-  .b-green{background:var(--green-soft);color:var(--green)}
-  .b-red{background:var(--red-soft);color:var(--red)}
-  .b-brown{background:var(--brown-soft);color:var(--brown)}
-  label{font-size:13px;font-weight:700;display:block;margin:10px 0 4px}
-  input,select{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:14px}
-  .btn{border:0;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;margin:6px 4px 0 0}
-  .btn-blue{background:var(--blue);color:#fff}
-  .btn-black{background:var(--black);color:#fff}
-  .btn-line{background:#fff;border:2px solid var(--black);color:var(--black)}
-  .item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
-  .tabs{display:flex;gap:6px;flex-wrap:wrap}
-  .tabs button{flex:1;min-width:90px;font-size:12px}
-  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
-  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-</style>
+<link rel="stylesheet" href="css/app.css" />
+<script src="js/trex.js"></script><script src="js/api.js"></script><script src="js/app.js"></script>
+<style>.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all}.tabs button{flex:1;min-width:84px;font-size:12px}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}.sm{display:inline-block;width:auto;padding:6px 10px;font-size:12px;margin:6px 6px 0 0}</style>
 </head>
-<body>
-<div class="wrap">
-  <div class="nav"><b>TREX OPERATIONS</b><span><a href="dashboard.html">Storefront</a> • <a href="more.html">All pages</a></span></div>
-  <div class="top">
-    <h2 style="margin:0 0 6px">Operations centre</h2>
-    <div class="muted" style="color:#C7CBD1" id="healthLine">Restricted to the Trex team • Every action is recorded</div>
-  </div>
+<body data-role="admin">
+<div class="wrap" style="max-width:760px">
+  <div class="nav"><b>TREX OPERATIONS</b><span><a href="design.html">Brand sheet</a><a href="dashboard.html">Storefront</a></span></div>
+  <div class="top"><h2 style="margin:0 0 6px">Operations centre</h2><div class="muted" id="healthLine">Restricted to the Trex team • Every action is recorded</div></div>
+  <div class="card tabs btnrow" id="tabs"><button class="btn btn-black sm" data-t="market">Market</button><button class="btn btn-line sm" data-t="currencies">Currencies</button><button class="btn btn-line sm" data-t="rates">Rates</button><button class="btn btn-line sm" data-t="reviews">Reviews</button><button class="btn btn-line sm" data-t="vendors">Vendors</button><button class="btn btn-line sm" data-t="config">Settings</button><button class="btn btn-line sm" data-t="support">Support</button><button class="btn btn-line sm" data-t="system">System check</button></div>
 
-  <div class="card tabs">
-    <button class="btn btn-black" data-t="market">Market</button>
-    <button class="btn btn-line" data-t="currencies">Currencies</button>
-    <button class="btn btn-line" data-t="rates">Rates</button>
-    <button class="btn btn-line" data-t="disputes">Reviews</button>
-    <button class="btn btn-line" data-t="vendors">Vendors</button>
-    <button class="btn btn-line" data-t="config">Settings</button>
-    <button class="btn btn-line" data-t="support">Support</button>
-  </div>
-
-  <div class="card" id="tab-market">
-    <b>Global market health</b>
-    <div id="health"></div>
-  </div>
-
-  <div class="card" id="tab-currencies" style="display:none">
-    <b>Currencies &amp; pairs</b>
-    <p class="muted">Changes apply instantly across the storefront — no rebuild needed. Pausing never strands an open trade.</p>
-    <label>Search currencies</label><input id="curSearch" placeholder="Search code, name, symbol or country">
-    <div id="curList"></div>
-    <label>Pause a pair</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="pa"></select><select id="pb"></select></div>
-    <button class="btn btn-black" id="pausePair">Pause pair</button>
-    <div id="pausedList" class="muted"></div>
-  </div>
-
-  <div class="card" id="tab-rates" style="display:none">
-    <b>Rate monitor</b>
-    <p class="muted">Reference vs live vendor offers. Stale or wild rates are highlighted, never silently used.</p>
-    <table><thead><tr><th>Pair</th><th>Reference</th><th>Best offer</th><th>Spread</th><th>Status</th></tr></thead><tbody id="rateRows"></tbody></table>
-  </div>
-
-  <div class="card" id="tab-disputes" style="display:none">
-    <b>Trades under review</b>
-    <div id="dlist"></div>
-  </div>
-
-  <div class="card" id="tab-vendors" style="display:none">
-    <b>Vendors</b>
-    <div id="vlist"></div>
-    <label>Vendor name</label>
-    <input id="vname" placeholder="e.g. Tunde">
-    <button class="btn btn-black" id="suspend">Suspend vendor</button>
-    <button class="btn btn-line" id="demote">Move back to Starter</button>
-    <div class="muted">Recent ratings: <span id="ratings"></span></div>
-  </div>
-
-  <div class="card" id="tab-config" style="display:none">
-    <b>Platform settings</b>
-    <label>Fee per trade (%)</label><input id="cFee" type="number" value="1.5" step="0.1">
-    <label>Vendor confirmation window (minutes)</label><input id="cConfirm" type="number" value="30">
-    <label>Auto-complete grace period (hours)</label><input id="cGrace" type="number" value="24">
-    <label>Second-approval threshold</label><input id="cThresh" type="number" value="500000">
-    <label>Threshold currency</label><select id="cThreshCur"></select>
-    <button class="btn btn-blue" id="saveCfg">Save settings</button>
-  </div>
-
-  <div class="card" id="tab-support" style="display:none">
-    <b>Support tickets</b>
-    <label>New ticket</label><input id="tTitle" placeholder="e.g. Payout not received">
-    <button class="btn btn-blue" id="addT">Open ticket</button>
-    <div id="tlist"></div>
-  </div>
-
-  <div class="card"><b>Activity log</b><div class="mono" id="audit"></div></div>
+  <div class="card" id="tab-market"><b>Global market health</b><div id="health"><p class="muted">Loading…</p></div></div>
+  <div class="card hidden" id="tab-currencies"><b>Currencies &amp; pairs</b><p class="muted">Changes apply instantly. Disabling a currency stops new trades in it; open trades are never stranded.</p>
+    <label>Search</label><input id="curSearch" placeholder="Code, name, symbol or country"><div id="curList"></div>
+    <label>Pause a pair</label><div class="grid"><select id="pa"></select><select id="pb"></select></div><button class="btn btn-black sm" id="pausePair">Pause / resume pair</button><div id="pausedList" class="muted"></div></div>
+  <div class="card hidden" id="tab-rates"><b>Rate monitor</b><p class="muted">Live market rate vs live vendor offers. Offers far from the market are flagged.</p><table><thead><tr><th>Pair</th><th>Market</th><th>Offer</th><th>Gap</th><th>Vendor</th></tr></thead><tbody id="rateRows"></tbody></table></div>
+  <div class="card hidden" id="tab-reviews"><b>Trades under review</b><div id="dlist"></div><div id="pending"></div><div id="flags"></div></div>
+  <div class="card hidden" id="tab-vendors"><b>Vendors</b><div id="vlist"></div></div>
+  <div class="card hidden" id="tab-config"><b>Platform settings</b>
+    <label>Fee per trade (%) — paid by the vendor</label><input id="cFee" type="number" step="0.1"><label>Vendor confirmation window (minutes)</label><input id="cConfirm" type="number"><label>Auto-complete grace period (hours)</label><input id="cGrace" type="number">
+    <label>Second-approval threshold (₦)</label><input id="cThresh" type="number"><button class="btn btn-blue" id="saveCfg">Save settings</button><div class="err" id="cMsg"></div></div>
+  <div class="card hidden" id="tab-support"><b>Support tickets</b><div id="tlist"></div></div>
+  <div class="card hidden" id="tab-system"><b>System check</b><p class="muted">Tests sign-in, the database, Better Auth sync, email and Paystack on the live site.</p><button class="btn btn-black" id="runCheck">Run system check</button><div id="checkOut"></div><div id="healthOut" class="mono"></div></div>
+  <div class="card"><b>Activity log</b><div class="mono" id="audit">Loading…</div></div>
 </div>
 <script>
-var $=function(id){return document.getElementById(id);};
-var J=function(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return (v===null||v===undefined)?d:v; }catch(e){ return d; } };
-var S=function(k,v){ localStorage.setItem(k,JSON.stringify(v)); };
-function audit(m){ var a=J("trex_audit",[]); a.push(new Date().toISOString()+" "+m); S("trex_audit",a.slice(-100)); paintAudit(); }
-function paintAudit(){ $("audit").textContent=(J("trex_audit",[]).join("\n")||"No activity yet."); }
-var TABS=["market","currencies","rates","disputes","vendors","config","support"];
-document.querySelectorAll("[data-t]").forEach(function(b){ b.onclick=function(){ TABS.forEach(function(t){$("tab-"+t).style.display=t===b.dataset.t?"block":"none";}); }; });
-function offers(){ try{ var v=JSON.parse(localStorage.getItem("trex_offers")); if(Array.isArray(v)&&v.length) return v; }catch(e){} return []; }
-function adminCfg(){ return J("trex_admin_config",{disabled:[],pausedPairs:[],fees:{pct:1.5}}); }
-function saveAdmin(c){ S("trex_admin_config",c); }
-
-function paintHealth(){
-  var live=TREX.CURRENCIES.filter(function(c){return TREX.currencyStatus(c.code)==="LIVE";}).length;
-  var trades=J("trex_trades",[]), disputes=J("trex_disputes",[]).filter(function(d){return d.state==="OPEN";});
-  var vol=trades.length;
-  $("health").innerHTML="<div class='item'>● "+live+" / "+TREX.CURRENCIES.length+" currencies live • "+vol+" completed trades • "+disputes.length+" open reviews</div>"
-    +"<div class='muted'>24h volume, liquidity and settlement health consolidate here in production.</div>";
-  $("healthLine").textContent="● System live • "+live+" currencies • "+disputes.length+" open reviews";
+var $=function(i){return document.getElementById(i);},esc=function(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+var TABS=["market","currencies","rates","reviews","vendors","config","support","system"],CFG={disabled:[],pausedPairs:[]};
+document.querySelectorAll("#tabs [data-t]").forEach(function(b){b.onclick=function(){TABS.forEach(function(t){$("tab-"+t).classList.toggle("hidden",t!==b.dataset.t);});document.querySelectorAll("#tabs button").forEach(function(x){x.className="btn sm "+(x===b?"btn-black":"btn-line");});};});
+function GET(p){return API.get(p);}
+function overview(){GET("/admin/overview").then(function(o){if(!o||!o.ok)return;
+  var st=Object.keys(o.trades).map(function(k){return esc(k.replace(/_/g," "))+": "+o.trades[k];}).join(" • ")||"no trades yet",vol=Object.keys(o.volume).map(function(k){return esc(TREX.fmt(o.volume[k],k));}).join(" • ")||"none yet";
+  $("health").innerHTML="<div class='item'>👥 "+o.users+" verified users • 🏪 "+o.vendors+" vendors</div><div class='item'>💱 Trades — "+st+"</div><div class='item'>💰 Completed volume — "+vol+"</div><div class='item'>⚠ "+o.openDisputes+" open reviews • "+o.pendingPayouts+" payouts awaiting approval • "+o.flagged+" face flags</div><div class='muted'>Rates updated: "+esc(o.rates_at?TREX.localTime(o.rates_at):"not yet")+"</div>";
+  $("healthLine").textContent="● System live • "+o.users+" users • "+o.openDisputes+" open reviews";});}
+function paintCur(q){var box=$("curList");box.innerHTML="";TREX.searchCurrencies(q||"").slice(0,15).forEach(function(c){var off=CFG.disabled.indexOf(c.code)>=0,d=document.createElement("div");d.className="item";
+  d.innerHTML="<b>"+c.flag+" "+c.code+"</b> — "+esc(c.name)+" <span class='badge "+(off?"b-red":"b-green")+"'>"+(off?"DISABLED":"LIVE")+"</span>";
+  var b=document.createElement("button");b.className="btn btn-line sm";b.textContent=off?"Enable":"Disable";b.onclick=function(){CFG.disabled=off?CFG.disabled.filter(function(x){return x!==c.code;}):CFG.disabled.concat([c.code]);API.post("/config",{disabled:CFG.disabled}).then(function(){paintCur($("curSearch").value);});};d.appendChild(b);box.appendChild(d);});
+  $("pausedList").textContent="Paused pairs: "+(CFG.pausedPairs.join(", ")||"none");}
+$("curSearch").oninput=function(){paintCur($("curSearch").value);};
+["pa","pb"].forEach(function(id){TREX.CURRENCIES.forEach(function(c){var o=document.createElement("option");o.value=c.code;o.textContent=c.code;$(id).appendChild(o);});});$("pa").value="USD";$("pb").value="NGN";
+$("pausePair").onclick=function(){var k=$("pa").value+"-"+$("pb").value,i=CFG.pausedPairs.indexOf(k);if(i>=0)CFG.pausedPairs.splice(i,1);else CFG.pausedPairs.push(k);API.post("/config",{pausedPairs:CFG.pausedPairs}).then(function(){paintCur($("curSearch").value);});};
+function rates(){GET("/offers").then(function(r){var rows="";((r&&r.offers)||[]).forEach(function(o){var ref=TREX.refRate(o.provide,o.want),gap=ref?(o.rate-ref)/ref*100:null;rows+="<tr><td>"+esc(o.provide)+"/"+esc(o.want)+"</td><td>"+(ref?esc(TREX.fmt(ref,o.want)):"—")+"</td><td>"+esc(TREX.fmt(o.rate,o.want))+"</td><td>"+(gap==null?"—":gap.toFixed(1)+"%"+(Math.abs(gap)>8?" ⚠":""))+"</td><td>"+esc(TREX.parseVendor(o.vendor).name)+"</td></tr>";});$("rateRows").innerHTML=rows||"<tr><td colspan='5' class='muted'>No live offers yet.</td></tr>";});}
+function reviews(){
+  GET("/disputes").then(function(r){var box=$("dlist");if(!r||!r.ok){box.innerHTML="<p class='muted'>"+esc((r&&r.error)||"")+"</p>";return;}
+    box.innerHTML=r.disputes.length?"":"<p class='muted'>Nothing under review.</p>";
+    r.disputes.slice().reverse().forEach(function(d){var el=document.createElement("div");el.className="item";
+      el.innerHTML="<div><b>"+esc(d.id)+"</b> <span class='badge "+(d.state==="OPEN"?"b-red":"b-blue")+"'>"+(d.state==="OPEN"?"Needs review":esc(d.state))+"</span></div><div class='muted mono'>"+esc(d.trade)+" • "+esc(d.cur)+" "+esc(d.amount)+" • bond held ₦"+esc(d.bond_ngn||0)+" • receipt: "+esc(d.proof||"—")+" • delivery: "+esc(d.delivery_proof||"—")+"</div><div class='muted'>"+esc(d.vendor)+" vs "+esc(d.customer)+" — opened by "+esc(d.opened_by||"")+"</div>";
+      function go(how,second){API.post("/resolve",{id:d.id,how:how,second_approval:second},API.key()).then(function(x){if(x.need_second){if(confirm("Large amount — confirm second approval."))return go(how,true);return;}if(!x.ok)alert(x.error||"Failed");reviews();overview();});}
+      if(d.state==="OPEN")[["Compensate customer","VENDOR-AT-FAULT","btn-black"],["Clear vendor","EXONERATED","btn-line"],["Split fairly","PARTIAL","btn-line"]].forEach(function(a){var b=document.createElement("button");b.className="btn sm "+a[2];b.textContent=a[0];b.onclick=function(){go(a[1]);};el.appendChild(b);});
+      box.appendChild(el);});});
+  GET("/bond/pending").then(function(x){$("pending").innerHTML="";if(!x||!x.ok||!x.payouts.length)return;$("pending").innerHTML="<b>Payouts awaiting second approval</b>";x.payouts.forEach(function(p){var el=document.createElement("div");el.className="item";el.innerHTML="<div class='mono'>"+esc(p.ref)+" • ₦"+esc(p.amount)+" • "+esc(p.email)+"</div>";var b=document.createElement("button");b.className="btn btn-blue sm";b.textContent="Approve payout";b.onclick=function(){API.post("/bond/approve",{ref:p.ref}).then(function(y){if(!y.ok)alert(y.error);reviews();});};el.appendChild(b);$("pending").appendChild(el);});});
+  GET("/liveness/flags").then(function(x){$("flags").innerHTML="";if(!x||!x.ok||!x.flags.length)return;$("flags").innerHTML="<b>Blocked duplicate-face attempts</b>";x.flags.forEach(function(p){var el=document.createElement("div");el.className="item";el.innerHTML="<div class='mono'>"+esc(p.email)+" matched "+esc(p.match)+"</div>";var b=document.createElement("button");b.className="btn btn-blue sm";b.textContent="Approve — different person";b.onclick=function(){API.post("/liveness/clear",{email:p.email}).then(reviews);};el.appendChild(b);$("flags").appendChild(el);});});
 }
-function paintCurrencies(q){
-  var cfg=adminCfg(), box=$("curList"); box.innerHTML="";
-  TREX.searchCurrencies(q||"").slice(0,15).forEach(function(c){
-    var st=TREX.currencyStatus(c.code);
-    var d=document.createElement("div"); d.className="item";
-    d.innerHTML="<div><b>"+c.flag+" "+c.code+"</b> — "+c.name+" <span class='badge "+(st==="LIVE"?"b-green":st==="DISABLED"?"b-red":"b-brown")+"'>"+st+"</span></div>";
-    ["LIVE","LIMITED","PAUSED","COMING_SOON","DISABLED"].forEach(function(s){
-      var b=document.createElement("button"); b.className="btn btn-line"; b.style.cssText="padding:6px 10px;font-size:12px"; b.textContent=s;
-      b.onclick=function(){
-        cfg.disabled=(cfg.disabled||[]).filter(function(x){return x!==c.code;});
-        if(s==="DISABLED")cfg.disabled.push(c.code);
-        saveAdmin(cfg); audit("Currency "+c.code+" → "+s); paintCurrencies($("curSearch").value); paintHealth();
-      };
-      d.appendChild(b);
-    });
-    box.appendChild(d);
-  });
-  var pl=$("pausedList"); pl.innerHTML="Paused pairs: "+((cfg.pausedPairs||[]).join(", ")||"none");
-}
-function fillPairSels(){ ["pa","pb"].forEach(function(id){ var s=$(id); s.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.code; s.appendChild(o); }); }); $("pa").value="USD"; $("pb").value="JPY"; }
-$("pausePair").onclick=function(){
-  var cfg=adminCfg(), k=$("pa").value+"-"+$("pb").value;
-  cfg.pausedPairs=cfg.pausedPairs||[];
-  var i=cfg.pausedPairs.indexOf(k);
-  if(i>=0){cfg.pausedPairs.splice(i,1); audit("Pair resumed "+k);} else {cfg.pausedPairs.push(k); audit("Pair paused "+k);}
-  saveAdmin(cfg); paintCurrencies($("curSearch").value);
-};
-$("curSearch").oninput=function(){paintCurrencies($("curSearch").value);};
-function paintRates(){
-  var rows="";
-  [["USD","NGN"],["GBP","NGN"],["EUR","NGN"],["USD","EUR"],["GBP","USD"],["USD","JPY"]].forEach(function(pr){
-    var ref=TREX.refRate(pr[0],pr[1]);
-    var best=null;
-    offers().forEach(function(o){ var pv=o.provide||"?", w=o.want||"?";
-      if((pv===pr[0]&&w===pr[1])){ if(best===null||o.rate<best)best=o.rate; } });
-    var spread=(ref&&best)?Math.abs(best-ref)/ref*100:null;
-    var st=TREX.pairStatus(pr[0],pr[1]);
-    var flag=spread!==null&&spread>8?" ⚠ wide":"";
-    rows+="<tr><td>"+pr[0]+"/"+pr[1]+"</td><td>"+(ref?TREX.fmtMoney(ref,pr[1]):"—")+"</td><td>"+(best?TREX.fmtMoney(best,pr[1]):"no offers")+"</td><td>"+(spread!==null?spread.toFixed(1)+"%"+flag:"—")+"</td><td>"+st+"</td></tr>";
-  });
-  $("rateRows").innerHTML=rows;
-}
-function paintDisputesLocal(){
-  var list=J("trex_disputes",[]), cfg=adminCfg();
-  $("dlist").innerHTML=list.length?"":"<p class='muted'>Nothing under review. Reported trades appear here with full evidence.</p>";
-  list.forEach(function(d){
-    var el=document.createElement("div"); el.className="item";
-    el.innerHTML="<div><b>"+d.id+"</b> <span class='badge "+(d.state==="OPEN"?"b-red":"b-blue")+"'>"+(d.state==="OPEN"?"Needs review":"Resolved")+"</span></div>"
-      +"<div class='muted mono'>"+(d.pair||"")+" • "+(d.cur||"")+" "+(d.amount||"")+" • Rate "+(d.rate||"—")+" • "+(d.method||"")+" • Receipt: "+(d.proof||"—")+"</div>"
-      +"<div class='muted'>"+(d.chat||"")+"</div>";
-    function act(how){
-      var big=(Number(d.amount)||0)>((cfg.fees&&cfg.thresh)||500000);
-      if(big && !confirm("Large amount — a second team member must approve. Confirm second approval.")) return;
-      d.state="RESOLVED-"+how; S("trex_disputes",list); audit(d.id+" resolved: "+how+(big?" (second approval)":"")); paintDisputes();
-    }
-    if(d.state==="OPEN"){
-      var c1=document.createElement("button");c1.className="btn btn-black";c1.textContent="Compensate customer";c1.onclick=function(){act("VENDOR-AT-FAULT");};
-      var c2=document.createElement("button");c2.className="btn btn-line";c2.textContent="Clear vendor";c2.onclick=function(){act("EXONERATED");};
-      var c3=document.createElement("button");c3.className="btn btn-line";c3.textContent="Split fairly";c3.onclick=function(){act("PARTIAL");};
-      el.append(c1,c2,c3);
-    }
-    $("dlist").appendChild(el);
-  });
-}
-function esc(x){ return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
-function liveH(k){ var h={"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("trex_session")}; if(k)h["X-Idempotency-Key"]="k_"+Date.now()+Math.random().toString(16).slice(2); return h; }
-function paintDisputes(){
-  if(!(window.API&&API.on&&localStorage.getItem("trex_session"))) return paintDisputesLocal();
-  fetch("/api/disputes",{headers:liveH()}).then(function(r){return r.json();}).then(function(r){
-    var box=$("dlist");
-    if(!r.ok){ box.innerHTML="<p class='muted'>"+esc(r.error||"Sign in with an admin email.")+" <a href='signin.html?next=admin.html'>Sign in →</a>"+"</p>"; return; }
-    box.innerHTML=r.disputes.length?"":"<p class='muted'>Nothing under review. Reported trades appear here with full evidence.</p>";
-    r.disputes.forEach(function(d){
-      var el=document.createElement("div"); el.className="item";
-      el.innerHTML="<div><b>"+esc(d.id)+"</b> <span class='badge "+(d.state==="OPEN"?"b-red":"b-blue")+"'>"+(d.state==="OPEN"?"Needs review":esc(d.state))+"</span></div>"
-        +"<div class='muted mono'>"+esc(d.pair)+" • "+esc(d.cur)+" "+esc(d.amount)+" • Bond held ₦"+esc(d.bond_ngn||0)+" • Receipt: "+esc(d.proof||"—")+" • Delivery: "+esc(d.delivery_proof||"—")+"</div><div class='muted'>"+esc(d.chat||"")+"</div>";
-      function go(how,second){ fetch("/api/resolve",{method:"POST",headers:liveH(1),body:JSON.stringify({id:d.id,how:how,second_approval:second})}).then(function(x){return x.json();}).then(function(x){
-        if(x.need_second){ if(confirm("Large amount — a second team member must approve. Confirm second approval.")) return go(how,true); return; }
-        if(!x.ok) alert(x.error||"Failed"); audit(d.id+" resolved: "+how); paintDisputes(); }); }
-      if(d.state==="OPEN"){ [["Compensate customer","VENDOR-AT-FAULT","btn-black"],["Clear vendor","EXONERATED","btn-line"],["Split fairly","PARTIAL","btn-line"]].forEach(function(a){ var b=document.createElement("button"); b.className="btn "+a[2]; b.textContent=a[0]; b.onclick=function(){go(a[1]);}; el.appendChild(b); }); }
-      box.appendChild(el);
-    });
-    fetch("/api/bond/pending",{headers:liveH()}).then(function(x){return x.json();}).then(function(x){
-      if(!x.ok||!x.payouts.length) return;
-      var h=document.createElement("div"); h.innerHTML="<b>Bond payouts awaiting second approval</b>"; box.appendChild(h);
-      x.payouts.forEach(function(p){ var el=document.createElement("div"); el.className="item"; el.innerHTML="<div class='mono'>"+esc(p.ref)+" • ₦"+esc(p.amount)+" • "+esc(p.email)+"</div>";
-        var b=document.createElement("button"); b.className="btn btn-blue"; b.textContent="Approve payout"; b.onclick=function(){ fetch("/api/bond/approve",{method:"POST",headers:liveH(),body:JSON.stringify({ref:p.ref})}).then(function(y){return y.json();}).then(function(y){ if(!y.ok)alert(y.error); paintDisputes(); }); };
-        el.appendChild(b); box.appendChild(el); });
-    });
-    fetch("/api/liveness/flags",{headers:liveH()}).then(function(x){return x.json();}).then(function(x){
-      if(!x.ok||!x.flags.length) return;
-      var h=document.createElement("div"); h.innerHTML="<b>Accounts flagged for a possible duplicate face</b>"; box.appendChild(h);
-      x.flags.forEach(function(p){ var el=document.createElement("div"); el.className="item"; el.innerHTML="<div class='mono'>"+esc(p.email)+" looks like "+esc(p.match)+"</div>";
-        var b=document.createElement("button"); b.className="btn btn-blue"; b.textContent="Clear — different person"; b.onclick=function(){ fetch("/api/liveness/clear",{method:"POST",headers:liveH(),body:JSON.stringify({email:p.email})}).then(function(){ paintDisputes(); }); };
-        el.appendChild(b); box.appendChild(el); });
-    });
-  }).catch(function(){ paintDisputesLocal(); });
-}
-function paintVendors(){
-  var names={}; offers().forEach(function(o){names[o.vendor]=1;});
-  var ratings=J("trex_ratings",[]);
-  $("vlist").innerHTML=Object.keys(names).map(function(n){return "<div class='item'>"+n+"</div>";}).join("")||"<p class='muted'>No vendors yet.</p>";
-  $("ratings").textContent=ratings.map(function(r){return r.rating;}).join(", ")||"none yet";
-}
-$("suspend").onclick=function(){ if(!$("vname").value){alert("Enter a vendor name.");return;} audit("Vendor suspended: "+$("vname").value); alert("Vendor suspended and recorded."); };
-$("demote").onclick=function(){ if(!$("vname").value){alert("Enter a vendor name.");return;} audit("Vendor moved to Starter: "+$("vname").value); alert("Vendor moved back to Starter and recorded."); };
-$("saveCfg").onclick=function(){ var cfg=adminCfg(); cfg.fees={pct:Number($("cFee").value)}; cfg.confirmMins=Number($("cConfirm").value); cfg.graceHours=Number($("cGrace").value); cfg.thresh=Number($("cThresh").value); saveAdmin(cfg); audit("Settings updated"); alert("Settings saved — quotes and timers update everywhere."); };
-$("addT").onclick=function(){ if(!$("tTitle").value){alert("Describe the issue first.");return;} var t=J("trex_tickets",[]); t.push({title:$("tTitle").value,at:new Date().toISOString()}); S("trex_tickets",t); $("tTitle").value=""; paintTickets(); audit("Ticket opened"); };
-function paintTickets(){ $("tlist").innerHTML=J("trex_tickets",[]).map(function(t){return "<div class='item'>"+t.title+"<div class='muted'>"+t.at+"</div></div>";}).join("")||"<p class='muted'>No open tickets.</p>"; }
-(function init(){
-  var s=$("cThreshCur"); TREX.CURRENCIES.slice(0,10).forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.code; s.appendChild(o); }); s.value="NGN";
-  fillPairSels(); paintHealth(); paintCurrencies(""); paintRates(); paintDisputes(); paintVendors(); paintTickets(); paintAudit();
-})();
+function vendors(){GET("/admin/vendors").then(function(r){var box=$("vlist");if(!r||!r.ok)return;box.innerHTML=r.vendors.length?"":"<p class='muted'>No vendors yet.</p>";r.vendors.forEach(function(v){var el=document.createElement("div");el.className="item";
+  el.innerHTML="<b>"+esc(v.name)+"</b> <span class='badge "+(v.suspended?"b-red":"b-green")+"'>"+(v.suspended?"Suspended":"Active")+"</span><div class='muted mono'>"+esc(v.email)+" • "+esc(v.country)+"</div><div class='muted'>"+v.completed+" completed • "+(v.rating==null?"no ratings":"★ "+v.rating)+" • disputes "+v.disputes+" • bond free ₦"+esc(v.available)+" / locked ₦"+esc(v.locked)+"</div>";
+  [[v.suspended?"Restore":"Suspend",v.suspended?"unsuspend":"suspend"],["Remove vendor status","demote"]].forEach(function(a){var b=document.createElement("button");b.className="btn btn-line sm";b.textContent=a[0];b.onclick=function(){if(confirm(a[0]+" — "+v.name+"?"))API.post("/admin/vendor",{email:v.email,action:a[1]}).then(function(){vendors();audit();});};el.appendChild(b);});box.appendChild(el);});});}
+function tickets(){GET("/tickets?all=1").then(function(r){$("tlist").innerHTML=(r&&r.tickets&&r.tickets.length)?r.tickets.slice().reverse().map(function(t){return "<div class='item'><b>"+esc(t.cat)+"</b> <span class='badge "+(t.status==="closed"?"b-green":"b-blue")+"'>"+esc(t.status)+"</span><div>"+esc(t.title)+"</div><div class='muted mono'>"+esc(t.by)+" • "+esc(TREX.localTime(t.at))+"</div>"+(t.status==="closed"?"":"<button class='btn btn-line sm' data-c='"+esc(t.id)+"'>Close ticket</button>")+"</div>";}).join(""):"<p class='muted'>No tickets.</p>";});}
+$("tlist").onclick=function(e){var b=e.target.closest("[data-c]");if(b)API.post("/tickets/close",{id:b.dataset.c}).then(tickets);};
+$("saveCfg").onclick=function(){API.post("/config",{fee_pct:Number($("cFee").value),confirm_mins:Number($("cConfirm").value),grace_hours:Number($("cGrace").value),thresh:Number($("cThresh").value)}).then(function(r){$("cMsg").style.color=r&&r.ok?"#027A48":"";$("cMsg").textContent=r&&r.ok?"Saved ✓":(r&&r.error)||"Failed";});};
+$("runCheck").onclick=function(){$("checkOut").innerHTML="<p class='muted'>Running…</p>";API.get("/authcheck").then(function(r){$("checkOut").innerHTML=(r.steps||[]).map(function(s){return "<div class='item'>"+(s.ok?"✅":"❌")+" "+esc(s.step)+(s.note&&!s.ok?"<div class='muted'>"+esc(s.note)+"</div>":"")+"</div>";}).join("")||"<p class='muted'>"+esc(r.error||"No result")+"</p>";});
+  fetch("/api/health").then(function(x){return x.json();}).then(function(h){$("healthOut").textContent=JSON.stringify(h,null,1);});};
+function audit(){GET("/audit").then(function(r){$("audit").textContent=r&&r.ok?(r.audit.slice(-60).reverse().map(function(a){return a.at+" "+a.event;}).join("\n")||"No activity yet."):"";});}
+TREXAPP.ready(function(){
+  API.get("/config").then(function(r){if(r&&r.ok){CFG={disabled:r.config.disabled||[],pausedPairs:r.config.pausedPairs||[]};$("cFee").value=r.config.fee_pct;$("cConfirm").value=r.config.confirm_mins;$("cGrace").value=r.config.grace_hours;paintCur("");}});
+  API.get("/config").then(function(){}); fetch("/api/config").then(function(){});
+  overview();rates();reviews();vendors();tickets();audit();$("cThresh").value=500000;setInterval(function(){overview();reviews();},20000);
+});
 </script>
 </body>
 </html>

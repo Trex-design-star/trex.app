@@ -1,13 +1,13 @@
-Add these in Netlify: Site configuration -> Environment variables -> Add a variable (one by one).
+Add in Netlify: Site configuration -> Environment variables -> Add a variable. Tick "Contains secret values" for the 3 marked SECRET.
 Name                  Value
-DATABASE_URL          Neon "direct" connection string (starts with postgres://) - NOT the pooled one
-ADMIN_EMAILS          your own email (more allowed, separated by commas)
-GMAIL_USER            the Gmail address that sends your emails, e.g. trexapp@gmail.com
-GMAIL_APP_PASSWORD    the 16-character Google "App password" for that Gmail
-PAYSTACK_SECRET_KEY   Paystack TEST secret key (sk_test_...) for now
-PAYSTACK_BANK         test-bank   (use wema-bank only when Paystack is live)
-Paystack dashboard -> Settings -> API Keys & Webhooks -> Test Webhook URL:
+DATABASE_URL          (SECRET) Neon DIRECT connection string, pooling OFF, starts with postgres://
+ADMIN_EMAILS          your own email (several allowed, comma separated) - these accounts get Operations
+GMAIL_USER            the Gmail address that sends Trex emails
+GMAIL_APP_PASSWORD    (SECRET) the 16-letter Google App password
+PAYSTACK_SECRET_KEY   (SECRET) your LIVE secret key (sk_live_...)
+PAYSTACK_BANK         access-bank
+Paystack dashboard -> Settings -> API Keys & Webhooks -> LIVE Webhook URL:
 https://YOURSITE.netlify.app/api/paystack/webhook
-After deploying open  https://YOURSITE.netlify.app/api/health
-  it must show "database":"postgres", "auth":"better-auth", "email":"gmail"
-Then sign in with your admin email and open  https://YOURSITE.netlify.app/api/authcheck  -> every line "ok":true
+Check after deploying:
+1. https://YOURSITE.netlify.app/api/health  -> "database":"postgres","auth":"better-auth","email":"gmail","paystack":true
+2. Sign in with an ADMIN_EMAILS account -> open admin.html -> System check -> Run -> every line must be a green tick

@@ -67,6 +67,7 @@
     }
   } catch (e) {}
 
+  try { if (root.fetch && root.location && /^https?:/.test(root.location.protocol)) root.fetch("/api/config").then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) store("trex_cfg", j.config); }).catch(function () {}); } catch (e) {}
   var T = {
     CURRENCIES: CURRENCIES, COUNTRIES: COUNTRIES, load: load, store: store,
     getCurrency: function (code) { return byCode[code] || null; },
@@ -85,7 +86,7 @@
         return c.code.toLowerCase().indexOf(q) >= 0 || c.name.toLowerCase().indexOf(q) >= 0 || c.symbol.toLowerCase().indexOf(q) >= 0 || (cn && cn.indexOf(q) >= 0);
       });
     },
-    adminCfg: function () { return load("trex_admin_config", { disabled: [], pausedPairs: [], fees: { pct: 1.5 } }); },
+    adminCfg: function () { var c = load("trex_cfg", null) || {}; return { disabled: c.disabled || [], pausedPairs: c.pausedPairs || [], fees: { pct: c.fee_pct || 1.5 }, fee_pct: c.fee_pct || 1.5 }; },
     currencyStatus: function (code) {
       if (!byCode[code]) return "DISABLED";
       var cfg = T.adminCfg();

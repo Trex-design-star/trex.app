@@ -1,7 +1,6 @@
-export const betterAuth=(cfg)=>{const pl=cfg.plugins.find(p=>p.id==="emailOTP").o;const otps={};
+export const betterAuth=(cfg)=>{const users=new Map();globalThis.__baUsers=users;
+ const mk=(email)=>{const token="rawtok"+Math.random().toString(16).slice(2);globalThis.__sessions.set(token,email);return token};
  return{api:{
-  sendVerificationOTP:async({body})=>{const code="424242";otps[body.email]=code;await pl.sendVerificationOTP({email:body.email,otp:code,type:body.type});return{success:true}},
-  signInEmailOTP:async({body})=>{const mode=globalThis.__BA_MODE||"both";if(mode==="throw")throw new Error("api mismatch");if(otps[body.email]!==body.otp)throw new Error("INVALID_OTP");
-   const token="rawtok"+Math.random().toString(16).slice(2);globalThis.__sessions.set(token,mode==="orphan"?"someone@else":body.email);globalThis.__users.add(body.email);
-   const h=new Headers(mode==="body"?{}:{"set-auth-token":token+".c2ln%3D"});return{headers:h,response:mode==="header"?{}:{token,user:{email:body.email}}}},
-  signOut:async()=>({success:true})}}};
+  signUpEmail:async({body})=>{if(globalThis.__BA_MODE==="throw")throw new Error("api mismatch");if(users.has(body.email))throw new Error("USER_ALREADY_EXISTS");users.set(body.email,body.password);globalThis.__users.add(body.email);globalThis.__accts.add(body.email);const t=mk(body.email);return{token:t,user:{email:body.email}}},
+  signInEmail:async({body})=>{const mode=globalThis.__BA_MODE||"both";if(mode==="throw")throw new Error("api mismatch");if(users.get(body.email)!==body.password)throw new Error("INVALID_EMAIL_OR_PASSWORD");
+   const token=mk(mode==="orphan"?"someone@else":body.email);const h=new Headers(mode==="body"?{}:{"set-auth-token":token+".c2ln%3D"});return{headers:h,response:mode==="header"?{}:{token,user:{email:body.email}}}}}}};

@@ -87,6 +87,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px"><b style="letter-spacing:.08em;color:#fff">TREX</b><span id="topLinks"><a href="signin.html" style="color:#B9CCFF;font-weight:600;text-decoration:none;margin-right:14px">Sign in</a><a href="onboarding.html" style="background:#155EEF;color:#fff;font-weight:700;text-decoration:none;padding:8px 14px;border-radius:10px">Create account</a></span></div>
   <!-- CINEMATIC HERO -->
   <div class="hero" id="hero">
     <div class="scene" aria-hidden="true">
@@ -96,10 +97,10 @@
         <path id="routePath" d="M90,280 C220,180 380,180 510,280"/>
         <path id="routeGlow" d="M90,280 C220,180 380,180 510,280"/>
       </svg>
-      <div class="node dim" id="nodeA"><div style="position:relative"><div class="avatar">🇳🇬</div><div class="pulse"></div></div><b>Ada • Lagos</b><small>needs $328.95</small></div>
-      <div class="node dim" id="nodeB"><div class="avatar">✓</div><b>Verified vendor</b><small>312 trades • 4.8★</small></div>
+      <div class="node dim" id="nodeA"><div style="position:relative"><div class="avatar">🇳🇬</div><div class="pulse"></div></div><b>Customer</b><small>needs foreign currency</small></div>
+      <div class="node dim" id="nodeB"><div class="avatar">✓</div><b>Verified vendor</b><small>bond-backed</small></div>
       <div id="shieldWrap"><div class="ring">🛡</div><small style="color:#fff;font-weight:700">Bond-backed</small></div>
-      <div id="burst">✓ ₦500,000 → $328.95 complete</div>
+      <div id="burst">✓ Trade complete</div>
     </div>
     <div class="caption">
       <small id="capKicker">TREX • PROTECTED GLOBAL MARKETPLACE</small>
@@ -126,23 +127,23 @@
     <p><b>1. You pick a pair.</b> Any supported currencies — your local one is there waiting, plus USD, GBP and EUR.</p>
     <p><b>2. A bonded vendor responds.</b> Every vendor backs trades with a refundable deposit. No bond, no trade.</p>
     <p><b>3. Protection activates.</b> Both sides attach proof in the trade chat. Nothing completes on words alone.</p>
-    <p><b>4. Currency is delivered.</b> Confirm receipt — or report a problem and our team reviews the full evidence, usually within 24 hours.</p>
+    <p><b>4. Currency is delivered.</b> Confirm receipt — or report a problem and our team reviews the full evidence.</p>
   </div>
 
   <div class="grid">
-    <div class="stat"><b>≥97%</b><br><span class="muted">dispute-free trades</span></div>
-    <div class="stat"><b>≤45 min</b><br><span class="muted">payment → complete</span></div>
-    <div class="stat"><b>24 hrs</b><br><span class="muted">review turnaround</span></div>
+    <div class="stat"><b>50%</b><br><span class="muted">bond locked on every trade</span></div>
+    <div class="stat"><b>Proof</b><br><span class="muted">required at every step</span></div>
+    <div class="stat"><b>People</b><br><span class="muted">review every dispute</span></div>
     <div class="stat"><b>40+</b><br><span class="muted">currencies supported</span></div>
   </div>
 
   <div class="card">
-    <span class="badge b-brown">Live markets</span>
-    <div class="pair">USD ↔ NGN • 🇺🇸 ⇄ 🇳🇬 • from top-rated vendors</div>
-    <div class="pair">GBP ↔ USD • 🇬🇧 ⇄ 🇺🇸 • deep liquidity</div>
-    <div class="pair">EUR ↔ USD • 🇪🇺 ⇄ 🇺🇸 • tight spreads</div>
-    <div class="pair">KES • JPY • GHS • ZAR • +35 more • add any currency after signup</div>
-    <a class="btn btn-blue" href="trade.html">Browse the market</a>
+    <span class="badge b-brown">Popular markets</span>
+    <div class="pair">USD ↔ NGN • 🇺🇸 ⇄ 🇳🇬</div>
+    <div class="pair">GBP ↔ USD • 🇬🇧 ⇄ 🇺🇸</div>
+    <div class="pair">EUR ↔ USD • 🇪🇺 ⇄ 🇺🇸</div>
+    <div class="pair">KES • JPY • GHS • ZAR • and many more</div>
+    <a class="btn btn-blue" href="signin.html?next=trade.html">Browse the market</a>
   </div>
 
   <div class="card">
@@ -154,6 +155,7 @@
 </div>
 
 <script>
+if(localStorage.getItem("trex_session")){var tl=document.getElementById("topLinks");if(tl)tl.innerHTML="<a href=\"dashboard.html\" style=\"background:#155EEF;color:#fff;font-weight:700;text-decoration:none;padding:8px 14px;border-radius:10px\">Open dashboard</a>";}
 (function(){
   var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   /* ---- live card ---- */
@@ -181,8 +183,8 @@
       vName=document.getElementById("vName"), vMeta=document.getElementById("vMeta"),
       prot=document.getElementById("protState");
   var STAGES=[
-    {t:"Ada in Lagos needs dollars.", s:"Searching for a vendor…", d:2200},
-    {t:"Verified vendor found — 312 trades, 4.8★.", s:"Vendor found ✓", d:2200},
+    {t:"A customer needs foreign currency.", s:"Searching for a vendor…", d:2200},
+    {t:"A verified vendor accepts the trade.", s:"Vendor found ✓", d:2200},
     {t:"Protection active — this trade is bond-backed.", s:"Protected ✓", d:2400},
     {t:"Payment made and verified by both sides.", s:"Payment confirmed", d:2400},
     {t:"Currency delivered. Trade complete.", s:"Completed ✓", d:2400}
@@ -197,7 +199,7 @@
     glow.style.opacity=i>=1?"1":"0";
     glow.style.transition="opacity .8s";
     if(i>=2){shield.classList.add("on"); prot.textContent="bond-backed ✓";} else {shield.classList.remove("on"); prot.textContent="activating…";}
-    if(i>=1){vDot.className="dot on"; vName.textContent="Adaobi • Verified vendor"; vMeta.textContent="312 trades • 4.8★ • Available";}
+    if(i>=1){vDot.className="dot on"; vName.textContent="Verified vendor"; vMeta.textContent="Bond-backed • Available";}
     else {vDot.className="dot"; vName.textContent="Finding a verified vendor…"; vMeta.textContent="";}
     burst.className=i===4?"on":"";
   }

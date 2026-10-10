@@ -7,6 +7,7 @@
 <script src="js/trex.js"></script>
 <script src="js/api.js"></script>
 <script src="js/chat.js"></script>
+<script src="js/app.js"></script>
 <style>
   :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
     --brown:#8C5A2B;--brown-soft:#F4E9D8;--green:#027A48;--green-soft:#DCFAE6;--red:#D92D20;--red-soft:#FEE4E2;
@@ -34,7 +35,7 @@
   .bottomnav a.on{color:var(--blue)}
 </style>
 </head>
-<body>
+<body data-role="vendor">
 <div class="wrap">
   <div class="nav"><b>TREX</b><span><a href="dashboard.html">Customer home</a><a href="trade.html">Trade</a></span></div>
   <div class="top">
@@ -77,9 +78,7 @@ function money(a,c){ try{ return TREX.fmtMoney(a,c); }catch(e){ return c+" "+Num
 function H(k){ var h={"Content-Type":"application/json"}; var t=localStorage.getItem("trex_session"); if(t)h.Authorization="Bearer "+t; if(k)h["X-Idempotency-Key"]="k_"+Date.now()+Math.random().toString(16).slice(2); return h; }
 function getJ(p){ return fetch("/api"+p,{headers:H()}).then(function(r){return r.json();}).catch(function(){return null;}); }
 function lj(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
-var vp=lj("trex_vendor_profile",{});
-$("vName").textContent=vp.name||"Your vendor account";
-$("vMeta").textContent=vp.bio||"Complete your vendor profile to appear to customers.";
+TREXAPP.ready(function(me){$("vName").textContent=me.name;$("vMeta").textContent=me.bio||"Keep your offers live and respond fast.";var o=new URLSearchParams(location.search).get("open");if(o)setTimeout(function(){var b=document.querySelector("button[data-a=chat][data-id=\""+o+"\"]");if(b)b.click();},1500);});
 function act(id,action,proof){ return fetch("/api/trade_action",{method:"POST",headers:H(1),body:JSON.stringify({id:id,action:action,proof:proof})}).then(function(r){return r.json();}); }
 function render(r){
   var offers=((r[0]&&r[0].offers)||[]).filter(function(o){return o.mine;});
@@ -103,7 +102,7 @@ function render(r){
     if(t.state==="payment_sent") btn="<button class='btn' data-a='confirm' data-id='"+esc(t.id)+"'>Confirm payment received</button><div class='muted'>Receipt: "+esc(t.proof||"—")+"</div>";
     if(t.state==="payment_confirmed") btn="<button class='btn' data-a='deliver' data-id='"+esc(t.id)+"'>I've sent the currency</button>";
     btn+="<button class='btn line' data-a='chat' data-id='"+esc(t.id)+"'>💬 Open chat</button>";
-    return "<div class='row'><b>"+esc(t.id)+"</b> • "+esc(t.amount)+" "+esc(t.provide)+"<div class='muted'>"+esc(t.state.replace(/_/g," "))+"</div>"+btn+"</div>";
+    return "<div class='row'><b>"+esc(t.id)+"</b> • "+esc(TREX.fmt(t.amount,t.provide))+" for "+esc(TREX.fmt(t.amount*t.rate,t.want))+"<div class='muted'>"+esc(t.state.replace(/_/g," "))+(t.with?" • customer "+esc(t.with.name):"")+"</div>"+(["opened","payment_sent","payment_confirmed","delivery_sent"].indexOf(t.state)>=0&&t.receive_details?"<div class='muted'>Send "+esc(t.provide)+" to: "+esc(t.receive_details)+"</div>":"")+btn+"</div>";
   }).join("")||"<p class='muted'>Trades customers open on your offers appear here.</p>";
 }
 var vchat=null;
@@ -120,7 +119,7 @@ $("trades").onclick=function(e){
     load();
   });
 };
-function load(){ Promise.all([getJ("/offers?all=1"),getJ("/trades"),getJ("/bond/me")]).then(render); }
+function load(){ Promise.all([getJ("/offers?mine=1"),getJ("/trades"),getJ("/bond/me")]).then(render); }
 load(); setInterval(load,10000);
 </script>
 </body>

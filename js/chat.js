@@ -42,7 +42,7 @@
     inp.appendChild(clip); inp.appendChild(txt); inp.appendChild(send);
     (opts.quick || []).forEach(function (t) { var b = el("button", null, t); b.onclick = function () { sendText(t); }; q.appendChild(b); });
     wa.appendChild(head); wa.appendChild(body); wa.appendChild(err); if ((opts.quick || []).length) wa.appendChild(q); wa.appendChild(inp); host.appendChild(wa);
-    var msgs = [], role = "", otherRead = "", last = "", timer = null, dead = false, pending = [];
+    var msgs = [], role = "", otherRead = "", last = "", timer = null, dead = false, pending = [], avSet = false, lastTy = 0;
     function showErr(m) { err.textContent = m; err.style.display = "block"; setTimeout(function () { err.style.display = "none"; }, 5000); }
     function render() {
       var atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80, day = "";
@@ -64,7 +64,8 @@
       API.get("/chat?trade=" + encodeURIComponent(tradeId) + (last ? "&since=" + encodeURIComponent(last) : "")).then(function (r) {
         if (dead) return;
         if (r && r.ok) {
-          role = r.role; otherRead = r.other_read || otherRead; var known = {}; msgs.forEach(function (m) { known[m.id] = 1; });
+          role = r.role; otherRead = r.other_read || otherRead;
+          if (r.other) { title.textContent = r.other.name; sub.textContent = r.other_typing ? "typing…" : (r.other.online ? "online" : tradeId + " • private chat"); if (r.other.avatar && !avSet) { avSet = true; av.textContent = ""; var im0 = el("img"); im0.src = r.other.avatar; im0.style.cssText = "width:36px;height:36px;border-radius:50%;object-fit:cover"; av.appendChild(im0); } } var known = {}; msgs.forEach(function (m) { known[m.id] = 1; });
           var add = (r.messages || []).filter(function (m) { return !known[m.id]; });
           if (add.length) { msgs = msgs.concat(add); last = msgs[msgs.length - 1].at; }
           if (role === "admin") inp.style.display = "none";
@@ -82,6 +83,7 @@
       }).catch(function () { pending = pending.filter(function (x) { return x !== p; }); showErr("No connection — message not sent."); render(); });
     }
     send.onclick = function () { var v = txt.value; txt.value = ""; sendText(v); };
+    txt.oninput = function () { if (Date.now() - lastTy > 3000) { lastTy = Date.now(); API.post("/chat", { trade: tradeId, typing: true }).catch(function () {}); } };
     txt.onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); send.onclick(); } };
     file.onchange = function () { if (file.files[0]) shrink(file.files[0], function (d) { if (d) sendText("", d); else showErr("Couldn't read that image."); }); file.value = ""; };
     tick();

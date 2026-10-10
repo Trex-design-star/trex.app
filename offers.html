@@ -1,222 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Trex — Your offers</title>
-<script src="js/trex.js"></script>
-<script src="js/api.js"></script>
-<style>
-  :root{--black:#0B0D12;--blue:#155EEF;--blue-dark:#0B2FB3;--blue-soft:#E4EBFF;
-    --brown:#8C5A2B;--brown-soft:#F4E9D8;--red:#D92D20;--red-soft:#FEE4E2;
-    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:680px;margin:0 auto;padding:16px 14px 96px}
-  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
-  .nav b{letter-spacing:.08em;color:#fff}
-  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600;margin-left:12px}
-  .prev{display:inline-block;font-size:11px;font-weight:700;background:var(--brown-soft);color:var(--brown);border-radius:999px;padding:3px 10px;margin-bottom:8px}
-  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
-  .muted{color:var(--muted);font-size:13px}
-  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
-  .b-blue{background:var(--blue-soft);color:var(--blue-dark)}
-  .b-red{background:var(--red-soft);color:var(--red)}
-  label{font-size:13px;font-weight:700;display:block;margin:10px 0 4px}
-  input,select,textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px}
-  .btn{width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px}
-  .btn-blue{background:var(--blue);color:#fff}
-  .btn-line{background:#fff;border:2px solid var(--black);color:var(--black)}
-  .offer{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
-  .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .mini{width:auto;padding:8px 12px;font-size:13px;margin:6px 4px 0 0}
-  .preview{background:#0B0D12;color:#fff;border-radius:12px;padding:14px;font-size:14px;margin-top:10px}
-  .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex}
-  .bottomnav a{flex:1;text-align:center;padding:12px 4px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none}
-  .bottomnav a.on{color:var(--blue)}
-</style>
+<link rel="stylesheet" href="css/app.css" />
+<script src="js/trex.js"></script><script src="js/api.js"></script><script src="js/app.js"></script>
+<style>.offer{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.preview{background:#0B0D12;color:#fff;border-radius:12px;padding:14px;font-size:14px;margin-top:10px}.mini{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:6px 6px 0 0}.chk{display:flex;gap:8px;align-items:center;font-weight:600;margin:6px 0}.chk input{width:auto}</style>
 </head>
-<body>
+<body data-role="vendor">
 <div class="wrap">
-  <div class="nav"><b>TREX</b><span><a href="dashboard.html">Home</a><a href="trade.html">Trade</a></span></div>
-  <span class="prev">Preview — sample figures, no real money moves</span>
-  <div class="top">
-    <h2 style="margin:0 0 6px">Your offers</h2>
-    <div class="muted" style="color:#C7CBD1">You're already a Trex customer — no new account needed. Complete your public vendor profile once, then publish offers.</div>
-  </div>
+  <div class="nav"><b>TREX</b><span><a href="vendor-dashboard.html">Dashboard</a><a href="trade.html">Trade</a></span></div>
+  <div class="top"><h2 style="margin:0 0 6px">Your offers</h2><div class="muted">Customers see your public profile on every offer. Publish the pairs you can fill.</div></div>
 
   <div class="card">
-    <div style="display:flex;gap:12px;align-items:center">
-      <img id="vphoto" alt="Your photo" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:#EDE9DE;display:block">
-      <div style="flex:1"><b id="vname">Your vendor profile</b><div class="muted">Buyers see this — no anonymous vending on Trex.</div>
-      <div class="muted" id="vbadges"></div></div>
-    </div>
-    <label>Profile photo (shows on every offer)</label>
-    <input type="file" accept="image/*" id="photoIn">
-    <label>Public display name</label>
-    <input id="pname" placeholder="e.g. Adaobi FX">
-    <label>Country you trade from</label>
-    <select id="pcountry"></select>
-    <label>About your service (1–2 lines buyers will read)</label>
-    <input id="pbio" placeholder="e.g. Fast USD liquidity, online 8am–10pm WAT">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><label>Reply pledge</label><select id="ppledge"><option>~5 minutes</option><option>~15 minutes</option><option>~30 minutes</option><option>~1 hour</option></select></div>
-      <div><label>Languages</label><input id="plangs" placeholder="e.g. English, Yoruba"></div>
-    </div>
-    <button class="btn btn-black" id="saveProfile">Save vendor profile</button>
+    <div style="display:flex;gap:12px;align-items:center"><img id="vphoto" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:#EDE9DE"><div style="flex:1"><b id="vname">Your vendor profile</b><div class="muted">This is public — no anonymous vending on Trex.</div></div></div>
+    <label>Profile picture</label><input type="file" accept="image/*" id="photoIn">
+    <label>Public display name</label><input id="pname" maxlength="40">
+    <label>About your service (1–2 lines)</label><input id="pbio" maxlength="200" placeholder="e.g. Fast USD liquidity, online 8am–10pm">
+    <div class="grid"><div><label>Reply pledge</label><select id="ppledge"><option>~5 minutes</option><option>~15 minutes</option><option>~30 minutes</option><option>~1 hour</option></select></div><div><label>Languages</label><input id="plangs" maxlength="60" placeholder="e.g. English, Yoruba"></div></div>
+    <button class="btn btn-black" id="saveProfile">Save vendor profile</button><div class="err" id="pErr"></div>
   </div>
 
   <div class="card">
     <b id="formTitle">New offer</b>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><label>Currency you provide</label><select id="provide"></select></div>
-      <div><label>Currency you want</label><select id="want"></select></div>
-    </div>
+    <div class="grid"><div><label>Currency you provide</label><select id="provide"></select></div><div><label>Currency you want</label><select id="want"></select></div></div>
     <div class="muted" id="refLine"></div>
-    <label>Your rate (how much they get per 1 you provide)</label>
-    <input id="rate" type="number" step="any">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><label>Minimum trade</label><input id="min" type="number" value="50"></div>
-      <div><label>Maximum trade</label><input id="max" type="number" value="2000"></div>
-    </div>
-    <label>Payment methods</label><select id="methods" multiple size="3"></select>
-    <label>When are you available?</label>
-    <select id="avail"><option>Online now</option><option>Offline</option><option>Scheduled hours</option></select>
-    <label>Offer terms (plain language)</label>
-    <textarea id="terms" rows="2">Pay within 30 minutes. Receipt required.</textarea>
-    <label>Display name</label>
-    <input id="vendor" value="You • ★5.0 • 0 trades">
+    <label>Your rate (how much of the currency you want, per 1 you provide)</label><input id="rate" type="number" step="any">
+    <div class="grid"><div><label>Minimum trade (<span class="pc">USD</span>)</label><input id="min" type="number" min="0"></div><div><label>Maximum trade (<span class="pc">USD</span>)</label><input id="max" type="number" min="0"></div></div>
+    <label>Where customers should pay you (shown only after you accept a trade)</label><textarea id="payd" rows="2" maxlength="200" placeholder="Bank name, account number and account name"></textarea>
+    <label>Payment methods</label><div id="methods"></div>
+    <label>Offer terms</label><textarea id="terms" rows="2" maxlength="200">Pay within 30 minutes. Receipt required.</textarea>
     <div class="preview" id="offerPreview"></div>
-    <button class="btn btn-blue" id="save">Publish offer</button>
-    <button class="btn btn-line" id="cancelEdit" style="display:none">Cancel editing</button>
+    <button class="btn btn-blue" id="save">Publish offer</button><button class="btn btn-line hidden" id="cancelEdit">Cancel editing</button><div class="err" id="oErr"></div>
   </div>
 
-  <div class="card">
-    <div class="row"><b>Your offers</b><select id="filter" style="width:auto"><option value="ALL">All pairs</option></select></div>
-    <div id="list"></div>
-  </div>
-
-  <div class="card">
-    <b>Your top markets</b>
-    <div id="analytics" class="muted">Your completed trades will build this picture.</div>
-  </div>
+  <div class="card"><b>Your offers</b><div id="list"><p class="muted">Loading…</p></div></div>
+  <div class="card"><b>Your top markets</b><div id="analytics" class="muted">Completed trades will build this picture.</div></div>
 </div>
-<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html">Profile</a><a href="more.html">More</a></nav>
+<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Vendor</a><a href="settings.html">Profile</a><a href="more.html">More</a></nav>
 <script>
-var $=function(id){return document.getElementById(id);};
-var KEY="trex_offers";
-var seed=[
-  {id:"OFR-1",provide:"USD",want:"NGN",rate:1520,rateText:"₦1,520 / $1",min:65,max:330,vendor:"Adaobi • ★4.8 • 312 trades",country:"NG",tier:"Gold",capacity:4000,methods:["Bank transfer"],terms:"Pay within 30 minutes.",live:true,legacy:true,pair:"USD/NGN"},
-  {id:"OFR-2",provide:"GBP",want:"NGN",rate:1940,rateText:"₦1,940 / £1",min:103,max:2060,vendor:"Tunde • ★4.9 • 540 trades",country:"NG",tier:"Gold",capacity:3000,methods:["Bank transfer"],terms:"Pay within 30 minutes.",live:true,legacy:true,pair:"GBP/NGN"},
-  {id:"OFR-3",provide:"EUR",want:"NGN",rate:1650,rateText:"₦1,650 / €1",min:60,max:1500,vendor:"New vendor • ★new • 3 trades",country:"NG",tier:"Probation",capacity:2000,methods:["Bank transfer"],terms:"Pay within 1 hour.",live:true,legacy:true,pair:"EUR/NGN"}
-];
-function load(){ try{ var v=JSON.parse(localStorage.getItem(KEY)); if(Array.isArray(v)&&v.length) return v.map(function(o){return TREX.normalizeOffer(o);}); }catch(e){} return seed; }
-function store(v){ localStorage.setItem(KEY,JSON.stringify(v)); }
-var offers=load(), editing=null;
-function vprof(){ try{ return JSON.parse(localStorage.getItem("trex_vendor_profile"))||{}; }catch(e){ return {}; } }
-function paintProfile(){
-  var p=vprof();
-  if(p.photo) $("vphoto").src=p.photo;
-  if(p.name){ $("vname").textContent=p.name; if(!$("vendor").value||$("vendor").value.indexOf("You •")===0) $("vendor").value=p.name+" • ★new • 0 trades"; }
-  var v=TREX.load("trex_verify",{});
-  var b=[]; if(v.phone)b.push("✓ Phone"); if(v.email)b.push("✓ Email"); if(v.liveness)b.push("✓ Liveness");
-  $("vbadges").textContent=b.length?b.join(" • ")+" verified":"Verify in Settings to earn badges";
-  var s=$("pcountry"); if(!s.options.length){ TREX.COUNTRIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.name; s.appendChild(o); }); }
-  var me=(TREX.profile()||{}).countryCode||"NG";
-  s.value=p.country||me;
-  if(p.bio)$("pbio").value=p.bio; if(p.pledge)$("ppledge").value=p.pledge; if(p.langs)$("plangs").value=p.langs; if(p.name)$("pname").value=p.name;
-}
-function readPhoto(file,cb){
-  var r=new FileReader();
-  r.onload=function(){ var img=new Image(); img.onload=function(){ var s=128/Math.max(img.width,img.height); var c=document.createElement("canvas"); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); c.getContext("2d").drawImage(img,0,0,c.width,c.height); try{cb(c.toDataURL("image/jpeg",0.7));}catch(e){cb(null);} }; img.src=r.result; };
-  r.readAsDataURL(file);
-}
-$("photoIn").onchange=function(){ if(this.files[0]) readPhoto(this.files[0],function(url){ if(url){ var p=vprof(); p.photo=url; try{localStorage.setItem("trex_vendor_profile",JSON.stringify(p));}catch(e){ alert("Photo too large to keep — try a smaller one."); return; } paintProfile(); } }); };
+var $=function(i){return document.getElementById(i);},esc=function(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+var mine=[],editing=null,avatar=null,METHODS=["Bank transfer","Mobile money","PayPal","Wise","Cash deposit"];
+function fillCur(sel,val){sel.innerHTML="";TREX.CURRENCIES.forEach(function(c){var o=document.createElement("option");o.value=c.code;o.textContent=c.flag+" "+c.code+" — "+c.name;sel.appendChild(o);});sel.value=val;}
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=160/Math.max(im.width,im.height),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",0.75));};im.onerror=function(){cb(null);};im.src=r.result;};r.readAsDataURL(file);}
+$("photoIn").onchange=function(){if(this.files[0])shrink(this.files[0],function(u){if(u){avatar=u;$("vphoto").src=u;}});};
 $("saveProfile").onclick=function(){
-  var p=vprof();
-  Object.assign(p,{name:$("pname").value||"You",country:$("pcountry").value,bio:$("pbio").value,pledge:$("ppledge").value,langs:$("plangs").value});
-  try{localStorage.setItem("trex_vendor_profile",JSON.stringify(p));}catch(e){ alert("Profile too large to save (photo). Use a smaller photo."); return; }
-  paintProfile(); alert("Vendor profile saved — opening your vendor dashboard."); location.href="vendor-dashboard.html";
+  var b={display:$("pname").value.trim(),bio:$("pbio").value,pledge:$("ppledge").value,langs:$("plangs").value};if(avatar)b.avatar=avatar;
+  API.post("/profile",b).then(function(r){$("pErr").style.color=r&&r.ok?"#027A48":"";$("pErr").textContent=r&&r.ok?"Saved ✓ — customers now see your updated profile.":(r&&r.error)||"Couldn't save.";if(r&&r.ok)$("vname").textContent=b.display;});
 };
-paintProfile();
-function apiPost(path,body){ try{ if(window.API&&API.on){ API.post(path,body,API.key()).catch(function(){}); } }catch(e){} }
-(function boot(){ try{ if(window.API&&API.on){ API.get("/offers?all=1").then(function(r){ if(r&&r.ok&&r.offers&&r.offers.length){ offers=r.offers.map(function(o){return TREX.normalizeOffer(o);}); store(offers); render(); } }).catch(function(){}); } }catch(e){} })();
-function fillCur(sel,val){ sel.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.code+" — "+c.name; sel.appendChild(o); }); sel.value=val; }
-function prof(){ return TREX.profile()||{countryCode:"NG"}; }
-function refreshMethods(){
-  var pm=TREX.paymentsFor(prof().countryCode||"NG",$("provide").value);
-  var s=$("methods"); s.innerHTML="";
-  (pm.available?pm.methods:[{id:"none",name:"No payment method available in your country yet"}]).forEach(function(m){
-    var o=document.createElement("option"); o.value=m.name; o.textContent=m.name+(m.eta?" ("+m.eta+")":""); s.appendChild(o);
-  });
+function preview(){
+  var p=$("provide").value,w=$("want").value,pcs=document.querySelectorAll(".pc");pcs.forEach(function(e){e.textContent=p;});
+  if(p===w){$("refLine").textContent="Pick two different currencies.";return;}
+  var ref=TREX.refRate(p,w);$("refLine").textContent="Live market: 1 "+p+" ≈ "+(ref?TREX.fmt(ref,w):"—");
+  if(!$("rate").value&&ref)$("rate").value=Number(ref.toPrecision(6));
+  var rate=Number($("rate").value)||0;$("offerPreview").innerHTML="<b>Your offer — "+esc(p)+" → "+esc(w)+"</b><br>You give 1 "+esc(p)+", customer pays "+esc(TREX.fmt(rate,w))+"<br>Limits "+esc($("min").value||"—")+"–"+esc($("max").value||"—")+" "+esc(p)+"<br>Platform fee ("+(TREX.adminCfg().fee_pct)+"%) is paid by you when a trade completes";
 }
-function refreshPreview(){
-  var p=$("provide").value, w=$("want").value;
-  if(p===w){ $("refLine").textContent="Pick two different currencies."; return; }
-  var ref=TREX.refRate(p,w);
-  $("refLine").textContent="Market reference: 1 "+p+" ≈ "+(ref?TREX.fmtMoney(ref,w):"—")+" (illustrative)";
-  if(! $("rate").value && ref) $("rate").value=Number(ref.toPrecision(6));
-  var rate=Number($("rate").value)||0, fee=1.5;
-  var net=rate*(1-fee/100);
-  $("offerPreview").innerHTML="<b>Offer preview — "+p+" → "+w+"</b><br>Your rate: "+TREX.fmtMoney(rate,w)+" per "+p
-    +"<br>Minimum "+$("min").value+" "+p+" • Maximum "+$("max").value+" "+p
-    +"<br>Typical fee ≈ "+fee+"% • Customer receives ≈ "+TREX.fmtMoney(net,w)+" per "+p;
-  var st=TREX.pairStatus(p,w);
-  if(st!=="LIVE"&&st!=="LIMITED") $("offerPreview").innerHTML+="<br>⚠ This pair is currently "+st+" — publishing will keep it hidden until it opens.";
-}
-["provide","want"].forEach(function(id){ $(id).addEventListener("change",function(){ refreshMethods(); refreshPreview(); }); });
-$("rate").oninput=refreshPreview; $("min").oninput=refreshPreview; $("max").oninput=refreshPreview;
+["provide","want"].forEach(function(i){$(i).onchange=function(){$("rate").value="";preview();};});$("rate").oninput=$("min").oninput=$("max").oninput=preview;
+$("methods").innerHTML=METHODS.map(function(m,i){return "<label class='chk'><input type='checkbox' value='"+m+"'"+(i===0?" checked":"")+"> "+m+"</label>";}).join("");
 function render(){
-  var f=$("filter").value; $("list").innerHTML="";
-  var sel=$("filter"); var cur=sel.value; sel.innerHTML='<option value="ALL">All pairs</option>';
-  var pairs={}; offers.forEach(function(o){ var k=(o.provide||"?")+" → "+(o.want||"?"); pairs[k]=1; });
-  Object.keys(pairs).forEach(function(k){ var o=document.createElement("option"); o.textContent=k; sel.appendChild(o); });
-  sel.value=cur;
-  offers.filter(function(o){ return f==="ALL"||((o.provide+" → "+o.want)===f); }).forEach(function(o){
-    var d=document.createElement("div"); d.className="offer";
-    d.innerHTML="<div class='row'><b>"+o.provide+" → "+o.want+"</b><span class='badge "+(o.live?"b-blue":"b-red")+"'>"+(o.live?"Live":"Paused")+"</span></div>"
-      +"<div>Rate: "+TREX.fmtMoney(o.rate,o.want)+" per "+o.provide+"</div>"
-      +"<div class='muted'>Min "+o.min+" "+o.provide+" – Max "+o.max+" "+o.provide+" • "+(o.methods||[]).join(", ")+"</div>"
-      +(o.photo||o.bio?("<div class='muted'>"+(o.photo?("<img src='"+o.photo+"' style='width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle'> "):"")+(o.bio||"")+"</div>"):"");
-    var e=document.createElement("button"); e.className="btn btn-line mini"; e.textContent="Edit";
-    e.onclick=function(){ editing=o.id; $("formTitle").textContent="Edit offer"; $("provide").value=o.provide; $("want").value=o.want; $("rate").value=o.rate; $("min").value=o.min; $("max").value=o.max; $("vendor").value=o.vendor; $("terms").value=o.terms||""; $("cancelEdit").style.display="block"; refreshMethods(); refreshPreview(); window.scrollTo({top:0,behavior:"smooth"}); };
-    var p2=document.createElement("button"); p2.className="btn btn-line mini"; p2.textContent=o.live?"Pause":"Resume";
-    p2.onclick=function(){ o.live=!o.live; store(offers); render(); apiPost("/offers",{id:o.id,live:o.live}); TREX.audit("Offer "+(o.live?"resumed ":"paused ")+o.id); };
-    var del=document.createElement("button"); del.className="btn btn-line mini"; del.textContent="Delete";
-    del.onclick=function(){ if(confirm("Delete this offer?")){ apiPost("/offers",{id:o.id,delete:true}); offers=offers.filter(function(x){return x.id!==o.id;}); store(offers); render(); } };
-    d.append(e,p2,del); $("list").appendChild(d);
+  $("list").innerHTML=mine.length?"":"<p class='muted'>No offers yet. Publish your first one above.</p>";
+  mine.forEach(function(o){
+    var d=document.createElement("div");d.className="offer";
+    d.innerHTML="<div style='display:flex;justify-content:space-between'><b>"+esc(o.provide)+" → "+esc(o.want)+"</b><span class='badge "+(o.live?"b-blue":"b-red")+"'>"+(o.live?"Live":"Paused")+"</span></div><div>Rate: "+esc(TREX.fmt(o.rate,o.want))+" per "+esc(o.provide)+"</div><div class='muted'>Limits "+esc(o.min)+"–"+esc(o.max)+" "+esc(o.provide)+" • "+esc((o.methods||[]).join(", "))+"</div>";
+    function btn(t,f){var b=document.createElement("button");b.className="btn btn-line mini";b.textContent=t;b.onclick=f;d.appendChild(b);}
+    btn("Edit",function(){editing=o.id;$("formTitle").textContent="Edit offer";$("provide").value=o.provide;$("want").value=o.want;$("rate").value=o.rate;$("min").value=o.min;$("max").value=o.max;$("payd").value=o.pay_details||"";$("terms").value=o.terms||"";$("cancelEdit").classList.remove("hidden");preview();window.scrollTo({top:300,behavior:"smooth"});});
+    btn(o.live?"Pause":"Resume",function(){API.post("/offers",{id:o.id,live:!o.live}).then(load);});
+    btn("Delete",function(){if(confirm("Delete this offer?"))API.post("/offers",{id:o.id,delete:true}).then(load);});
+    $("list").appendChild(d);
   });
-  var trades=TREX.load("trex_trades",[]), byPair={};
-  trades.forEach(function(t){ byPair[t.pair]=byPair[t.pair]||{n:0,amt:0,cur:t.cur}; byPair[t.pair].n++; byPair[t.pair].amt+=Number(t.amount)||0; });
-  var keys=Object.keys(byPair);
-  $("analytics").innerHTML=keys.length?keys.map(function(k){return "<div>• "+k+": "+byPair[k].n+" trades, "+byPair[k].amt.toLocaleString()+" "+byPair[k].cur+" volume</div>";}).join(""):"Your completed trades will build this picture.";
 }
+function load(){API.get("/offers?mine=1").then(function(r){mine=(r&&r.ok&&r.offers)||[];render();});
+  API.get("/trades").then(function(r){var by={};((r&&r.trades)||[]).filter(function(t){return t.role==="vendor"&&t.state==="completed";}).forEach(function(t){var k=t.provide+" → "+t.want;by[k]=by[k]||{n:0,a:0,c:t.provide};by[k].n++;by[k].a+=t.amount;});
+    var ks=Object.keys(by);$("analytics").innerHTML=ks.length?ks.map(function(k){return "<div>• "+esc(k)+": "+by[k].n+" trades, "+esc(TREX.fmt(by[k].a,by[k].c))+" volume</div>";}).join(""):"Completed trades will build this picture.";});}
 $("save").onclick=function(){
-  var p=$("provide").value, w=$("want").value;
-  if(p===w){ alert("Pick two different currencies."); return; }
-  var min=Number($("min").value), max=Number($("max").value);
-  if(!(min>0)||!(max>min)){ alert("Maximum must be above minimum."); return; }
-  var rate=Number($("rate").value); if(!(rate>0)){ alert("Set your rate first."); return; }
-  var methods=[...$("methods").selectedOptions].map(function(o){return o.value;});
-  if(!methods.length) methods=["Bank transfer"];
-  if(editing){ var o=offers.find(function(x){return x.id===editing;});
-    Object.assign(o,{provide:p,want:w,rate:rate,rateText:TREX.fmtMoney(rate,w)+" per "+p,min:min,max:max,methods:methods,vendor:$("vendor").value,terms:$("terms").value,avail:$("avail").value});
-    var vp0=vprof();
-    o.photo=vp0.photo||o.photo||null; o.bio=vp0.bio||""; o.vcountry=vp0.country||o.country; o.pledge=vp0.pledge||"~15 minutes"; o.langs=vp0.langs||"";
-    apiPost("/offers",{id:o.id,rate:rate,min:min,max:max,methods:methods,vendor:o.vendor,terms:o.terms});
-    editing=null; $("formTitle").textContent="New offer"; $("cancelEdit").style.display="none";
-  } else { var no={provide:p,want:w,rate:rate,min:min,max:max,methods:methods,vendor:$("vendor").value,country:prof().countryCode,terms:$("terms").value};
-    var vp=vprof();
-    no.photo=vp.photo||null; no.bio=vp.bio||""; no.vcountry=vp.country||prof().countryCode; no.pledge=vp.pledge||"~15 minutes"; no.langs=vp.langs||"";
-    apiPost("/offers",no);
-    offers.push(Object.assign({id:"OFR-"+Date.now().toString(36).toUpperCase(),rateText:TREX.fmtMoney(rate,w)+" per "+p,tier:"Probation",capacity:5000,avail:$("avail").value,live:true},no));
-  }
-  store(offers); render(); TREX.audit("Offer published "+p+"→"+w);
+  $("oErr").textContent="";var methods=Array.prototype.map.call(document.querySelectorAll("#methods input:checked"),function(x){return x.value;});
+  var b={provide:$("provide").value,want:$("want").value,rate:Number($("rate").value),min:Number($("min").value),max:Number($("max").value),pay_details:$("payd").value.trim(),methods:methods.length?methods:["Bank transfer"],terms:$("terms").value};
+  if(editing)b.id=editing;
+  API.post("/offers",b).then(function(r){
+    if(r&&r.ok){editing=null;$("formTitle").textContent="New offer";$("cancelEdit").classList.add("hidden");$("oErr").style.color="#027A48";$("oErr").textContent="Offer saved ✓ — customers can now see it.";load();}
+    else{$("oErr").style.color="";$("oErr").textContent=(r&&r.error)||"Couldn't save the offer.";}});
 };
-$("cancelEdit").onclick=function(){ editing=null; $("formTitle").textContent="New offer"; $("cancelEdit").style.display="none"; };
-$("filter").onchange=render;
-fillCur($("provide"),"USD"); fillCur($("want"),"NGN"); refreshMethods(); refreshPreview(); store(offers); render();
+$("cancelEdit").onclick=function(){editing=null;$("formTitle").textContent="New offer";$("cancelEdit").classList.add("hidden");};
+TREXAPP.ready(function(me){
+  API.get("/profile").then(function(r){if(r&&r.ok){var p=r.profile;$("pname").value=p.display||"";$("vname").textContent=p.display||"Your vendor profile";$("pbio").value=p.bio||"";if(p.pledge)$("ppledge").value=p.pledge;$("plangs").value=p.langs||"";if(p.avatar)$("vphoto").src=p.avatar;}});
+  fillCur($("provide"),"USD");fillCur($("want"),(TREX.getCountry(me.country)||{currency:"NGN"}).currency);preview();load();
+});
 </script>
 </body>
 </html>

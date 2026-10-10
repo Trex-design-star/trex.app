@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trex — Notifications</title>
+<link rel="stylesheet" href="css/app.css" />
+<script src="js/api.js"></script><script src="js/app.js"></script>
+<style>.it{display:flex;gap:12px;padding:12px 4px;border-top:1px solid var(--line);cursor:pointer}.it:first-child{border-top:0}.ic{width:38px;height:38px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 auto}.it.un{background:#F6F8FF}.dot{width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:6px}.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><b>TREX</b><span><a href="dashboard.html">Home</a><a href="trade.html">Trade</a></span></div>
+  <div class="top"><h2 style="margin:0 0 6px">Notifications</h2><div class="muted">Trades, payments, messages and security alerts.</div></div>
+  <div class="tabs" id="tabs" style="margin-top:10px"></div>
+  <div class="card" id="list"><p class="muted">Loading…</p></div>
+  <button class="btn btn-line" id="all">Mark all as read</button>
+</div>
+<nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html">Profile</a><a href="more.html">More</a></nav>
+<script>
+var $=function(i){return document.getElementById(i);},esc=function(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+var TABS=[["all","All"],["trade","Trades"],["payment","Payments"],["chat","Chat"],["security","Security"],["system","System"]],ICON={trade:"💱",payment:"💰",chat:"💬",security:"🛡",system:"📣"},cur="all",items=[];
+function ago(iso){var s=(Date.now()-Date.parse(iso))/1000;if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+" min ago";if(s<86400)return Math.floor(s/3600)+" h ago";return new Date(iso).toLocaleDateString();}
+function draw(){
+  $("tabs").innerHTML=TABS.map(function(t){var n=items.filter(function(x){return !x.read&&(t[0]==="all"||x.type===t[0]);}).length;return "<button class='pairchip"+(cur===t[0]?" on":"")+"' data-t='"+t[0]+"'>"+t[1]+(n?" ("+n+")":"")+"</button>";}).join("");
+  var l=items.filter(function(x){return cur==="all"||x.type===cur;});
+  $("list").innerHTML=l.length?l.map(function(x){return "<div class='it"+(x.read?"":" un")+"' data-id='"+esc(x.id)+"' data-l='"+esc(x.link)+"'><div class='ic'>"+(ICON[x.type]||"🔔")+"</div><div><b>"+(x.read?"":"<span class='dot'></span>")+esc(x.title)+"</b><div class='muted'>"+esc(x.body)+"</div><div class='muted'>"+ago(x.at)+"</div></div></div>";}).join(""):"<p class='muted'>Nothing here yet. Updates about your trades and payments will appear here.</p>";
+}
+function load(){API.get("/notifications").then(function(r){if(r&&r.ok){items=r.items;draw();}});}
+$("tabs").onclick=function(e){var b=e.target.closest("[data-t]");if(b){cur=b.dataset.t;draw();}};
+$("list").onclick=function(e){var it=e.target.closest(".it");if(!it)return;API.post("/notifications",{ids:[it.dataset.id]}).then(function(){if(it.dataset.l)location.href=it.dataset.l;else load();});};
+$("all").onclick=function(){API.post("/notifications",{all:true}).then(load);};
+load();setInterval(load,15000);
+</script>
+</body>
+</html>

@@ -1,124 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Trex — Settings</title>
-<script src="js/trex.js"></script>
-<style>
-  :root{--black:#0B0D12;--blue:#155EEF;--blue-soft:#E4EBFF;--blue-dark:#0B2FB3;
-    --brown:#8C5A2B;--brown-soft:#F4E9D8;--green:#027A48;--green-soft:#DCFAE6;
-    --ink:#0B0D12;--muted:#4B5563;--bg:#2A0A54;--card:#fff;--line:#E4E0D6;--radius:14px}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:640px;margin:0 auto;padding:16px 14px 96px}
-  .nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 12px;font-size:14px}
-  .nav b{letter-spacing:.08em;color:#fff}
-  .nav a{color:#B9CCFF;text-decoration:none;font-weight:600;margin-left:12px}
-  .top{background:var(--black);color:#fff;border-radius:var(--radius);padding:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
-  .muted{color:var(--muted);font-size:13px}
-  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
-  .b-ok{background:var(--green-soft);color:var(--green)}
-  label{font-size:13px;font-weight:700;display:block;margin:10px 0 4px}
-  input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px}
-  .btn{border:0;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;background:var(--blue);color:#fff;width:100%}
-  .btn.line{background:#fff;border:2px solid var(--black);color:var(--black)}
-  .crow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
-  .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex}
-  .bottomnav a{flex:1;text-align:center;padding:12px 4px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none}
-  .bottomnav a.on{color:var(--blue)}
-</style>
+<link rel="stylesheet" href="css/app.css" />
+<script src="js/trex.js"></script><script src="js/api.js"></script><script src="js/liveness.js"></script><script src="js/app.js"></script>
 </head>
 <body>
 <div class="wrap">
   <div class="nav"><b>TREX</b><span><a href="dashboard.html">Home</a><a href="trade.html">Trade</a></span></div>
-  <div class="top"><h2 style="margin:0 0 6px">Country, currencies &amp; security</h2>
-  <div class="muted" style="color:#C7CBD1">Your money, shown your way, protected everywhere.</div></div>
+  <div class="top"><div style="display:flex;gap:12px;align-items:center"><img id="myPic" class="avatar" alt="" style="width:56px;height:56px"><div><h2 style="margin:0" id="myName">Your profile</h2><div class="muted" id="myMail"></div></div></div></div>
+  <div class="btnrow" id="tabs"><button class="pairchip on" data-t="tProf">👤 Profile</button><button class="pairchip" data-t="tPay">🏦 Payout</button><button class="pairchip" data-t="tSec">🔒 Security</button><button class="pairchip" data-t="tSup">💬 Support</button></div>
 
-  <div class="btnrow" id="setTabs" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-    <button class="pairchip" data-st="stCur" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">🌍 Country</button>
-    <button class="pairchip" data-st="stSec" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">🔒 Security</button>
-    <button class="pairchip" data-st="stSup" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">💬 Support</button>
-  </div>
+  <div id="tProf"><div class="card"><b>Edit your profile</b><p class="muted">Your name and picture are public to people you trade with.</p>
+    <label>Profile picture</label><input type="file" accept="image/*" id="pic"><button class="btn btn-line small" id="rmPic" type="button">Remove picture</button>
+    <label>Display name</label><input id="disp" maxlength="40">
+    <label>About you</label><input id="bio" maxlength="200" placeholder="A short line about you">
+    <div class="grid"><div><label>Reply time</label><select id="pledge"><option value="">—</option><option>~5 minutes</option><option>~15 minutes</option><option>~30 minutes</option><option>~1 hour</option></select></div><div><label>Languages</label><input id="langs" maxlength="60"></div></div>
+    <label>Country</label><select id="ctry"></select><div class="muted">Changing country changes your bond currency and is blocked while a bond is locked.</div>
+    <button class="btn btn-blue" id="saveP">Save profile</button><div class="err" id="pErr"></div></div></div>
 
-  <div id="stCur">
-  <div class="card">
-    <b>Country &amp; local currency</b>
-    <label>Country</label><select id="ctry"></select>
-    <div class="muted" id="ctryWarn"></div>
-    <label>Preferred currency</label><select id="pref"></select>
-    <label>Display currency (totals &amp; equivalents)</label><select id="disp"></select>
-    <button class="btn" id="saveCtry">Save</button>
-  </div>
+  <div id="tPay" class="hidden"><div class="card"><b>Payout account</b><p class="muted">Where we send your money: returned bonds, compensation and withdrawals. We verify the account name with your bank.</p>
+    <label>Bank</label><select id="payBank"></select><label>Account number</label><input id="payNo" inputmode="numeric" maxlength="10"><button class="btn btn-black" id="paySave">Save payout account</button><div class="log" id="payLog">Not saved yet.</div></div>
+    <div class="card"><b>Withdraw</b><div class="muted">Free balance: <b id="wFree">₦0</b></div><label>Amount (₦)</label><input id="wAmt" type="number" min="0"><button class="btn btn-blue" id="wGo">Withdraw to my bank</button><div class="log" id="wLog">No withdrawals yet.</div></div></div>
 
-  <div class="card">
-    <b>Your trading currencies</b>
-    <div id="enList"></div>
-    <label>Add another</label><select id="addSel"></select>
-    <button class="btn" id="addBtn">Add currency</button>
-  </div>
-  </div>
+  <div id="tSec" class="hidden"><div class="card"><b>Face check</b><p class="muted" id="liveNote">Checking…</p><div id="liveHost"></div></div>
+    <div class="card"><b>Password</b><p class="muted">We'll email you a code to set a new password. You'll be signed out everywhere.</p>
+      <button class="btn btn-black" id="pwSend">Email me a code</button>
+      <div class="hidden" id="pwBox"><label>6-digit code</label><input id="pwCode" inputmode="numeric" maxlength="6"><label>New password</label><input id="pwNew" type="password" autocomplete="new-password" placeholder="8+ characters, a letter and a number"><button class="btn btn-blue" id="pwGo">Change password</button></div><div class="err" id="pwErr"></div></div>
+    <div class="card"><b>Sign out</b><button class="btn btn-line" id="out1">Sign out of this device</button><button class="btn btn-line" id="out2">Sign out everywhere</button></div></div>
 
-  <div id="stSec" style="display:none">
-  <div class="card">
-    <b>Security centre</b>
-    <div id="secList"></div>
-    <button class="btn line" id="signOut">Sign out everywhere</button>
-  </div>
-  </div>
-
-  <div id="stSup" style="display:none">
-  <div class="card">
-    <b>Support</b>
-    <p class="muted">Trading, payments, verification, currencies, disputes — one place.</p>
-    <label>What do you need help with?</label>
-    <select id="supCat"><option>Trading</option><option>Payments</option><option>Verification</option><option>Currency</option><option>Vendor</option><option>Bond</option><option>Account</option><option>Security</option><option>Dispute</option><option>Technical issue</option></select>
-    <input id="supMsg" placeholder="Describe the issue">
-    <button class="btn" id="supGo">Open ticket</button>
-    <div id="supList"></div>
-  </div>
-  </div>
+  <div id="tSup" class="hidden"><div class="card"><b>Support</b><p class="muted">Trading, payments, verification, disputes — one place.</p>
+    <label>Topic</label><select id="supCat"><option>Trading</option><option>Payments</option><option>Verification</option><option>Vendor</option><option>Bond</option><option>Account</option><option>Dispute</option><option>Technical issue</option></select>
+    <label>Describe the issue</label><textarea id="supMsg" rows="3" maxlength="300"></textarea><button class="btn btn-blue" id="supGo">Open ticket</button><div id="supList"></div></div></div>
 </div>
 <nav class="bottomnav"><a href="dashboard.html">Home</a><a href="trade.html">Trade</a><a href="vendor.html">Become a vendor</a><a href="settings.html" class="on">Profile</a><a href="more.html">More</a></nav>
 <script>
-var $=function(id){return document.getElementById(id);};
-function prof(){ var p=TREX.profile(); if(!p){p={countryCode:"NG",localCurrency:"NGN",preferred:"NGN",display:"NGN",enabled:TREX.defaultSet("NG"),favorites:[],confirmed:true}; TREX.saveProfile(p);} return p; }
-function fillCountries(){ var s=$("ctry"),p=prof(); s.innerHTML=""; TREX.COUNTRIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.name+" ("+c.status+")"; s.appendChild(o); }); s.value=p.countryCode; }
-function fillCur(sel,val){ sel.innerHTML=""; TREX.CURRENCIES.forEach(function(c){ var o=document.createElement("option"); o.value=c.code; o.textContent=c.flag+" "+c.code; sel.appendChild(o); }); sel.value=val; }
-function paint(){
-  var p=prof(); fillCountries(); fillCur($("pref"),p.preferred); fillCur($("disp"),p.display||p.localCurrency);
-  var el=$("enList"); el.innerHTML="";
-  p.enabled.forEach(function(code,i){
-    var c=TREX.getCurrency(code); if(!c)return;
-    var d=document.createElement("div"); d.className="crow";
-    d.innerHTML="<span>"+c.flag+" <b>"+code+"</b>"+(code===p.preferred?" ★":"")+"</span>";
-    var r=document.createElement("span");
-    var up=document.createElement("button"); up.textContent="↑"; up.onclick=function(){ if(i>0){var t=p.enabled[i-1];p.enabled[i-1]=code;p.enabled[i]=t;TREX.saveProfile(p);paint();} };
-    var dn=document.createElement("button"); dn.textContent="↓"; dn.onclick=function(){ if(i<p.enabled.length-1){var t=p.enabled[i+1];p.enabled[i+1]=code;p.enabled[i]=t;TREX.saveProfile(p);paint();} };
-    var fav=document.createElement("button"); fav.textContent=p.favorites.indexOf(code)>=0?"★":"☆"; fav.onclick=function(){ var ix=p.favorites.indexOf(code); if(ix<0)p.favorites.push(code); else p.favorites.splice(ix,1); TREX.saveProfile(p); paint(); };
-    var rm=document.createElement("button"); rm.textContent="Remove"; rm.onclick=function(){ if(p.enabled.length<=1){alert("Keep at least one currency.");return;} if(!confirm("Remove "+code+" from your dashboard?"))return; p.enabled=p.enabled.filter(function(x){return x!==code;}); TREX.saveProfile(p); paint(); };
-    r.append(up,dn,fav,rm); d.appendChild(r); el.appendChild(d);
-  });
-  fillCur($("addSel"),"USD");
-  var v=TREX.load("trex_verify",{phone:true,email:true,liveness:true,pin:true});
-  $("secList").innerHTML=["email","liveness","pin"].map(function(k){return "<div class='crow'><span>"+k.charAt(0).toUpperCase()+k.slice(1)+" verified</span><span class='badge b-ok'>"+(v[k]?"On":"Off")+"</span></div>";}).join("")
-    +"<div class='crow'><span>Trusted devices</span><span class='muted'>This device</span></div><div class='crow'><span>Last sign-in</span><span class='muted'>"+TREX.localTime()+"</span></div>";
-  paintSup();
-}
-$("ctry").onchange=function(){ $("ctryWarn").textContent="Changing country updates payment methods, limits and available markets. Your open trades keep their original terms."; };
-$("saveCtry").onclick=function(){
-  var p=prof(), nc=$("ctry").value, g=TREX.getCountry(nc);
-  p.countryCode=nc; p.localCurrency=g.currency; p.preferred=$("pref").value; p.display=$("disp").value; p.confirmed=true;
-  if(p.enabled.indexOf(g.currency)<0)p.enabled.unshift(g.currency);
-  TREX.saveProfile(p); TREX.audit("Country set to "+nc); alert("Saved — "+g.flag+" "+g.name+", local "+g.currency+"."); paint();
-};
-$("addBtn").onclick=function(){ var p=prof(),c=$("addSel").value; if(p.enabled.indexOf(c)<0){p.enabled.push(c);TREX.saveProfile(p);paint();} };
-$("signOut").onclick=function(){ if(confirm("Sign out of Trex?")){ var t=localStorage.getItem("trex_session")||""; TREX.audit("Signed out"); fetch("/api/signout",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:"{}"}).catch(function(){}).then(function(){ localStorage.removeItem("trex_session"); localStorage.removeItem("trex_email"); location.href="signin.html"; }); } };
-$("supGo").onclick=function(){ if(!$("supMsg").value){alert("Describe the issue first.");return;} var t=TREX.load("trex_tickets",[]); t.push({cat:$("supCat").value,title:$("supMsg").value,at:new Date().toISOString()}); TREX.store("trex_tickets",t); $("supMsg").value=""; paintSup(); TREX.audit("Support ticket opened"); };
-function paintSup(){ $("supList").innerHTML=TREX.load("trex_tickets",[]).map(function(t){return "<div class='crow'><span><b>"+t.cat+":</b> "+t.title+"</span><span class='muted'>Open</span></div>";}).join("")||"<p class='muted'>No tickets yet.</p>"; }
-document.querySelectorAll("#setTabs [data-st]").forEach(function(b){ b.onclick=function(){ ["stCur","stSec","stSup"].forEach(function(id){ $(id).style.display=id===b.dataset.st?"block":"none"; }); window.scrollTo(0,0); }; });
-paint();
+var $=function(i){return document.getElementById(i);},esc=function(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+var pic=null;
+function tab(id){["tProf","tPay","tSec","tSup"].forEach(function(t){$(t).classList.toggle("hidden",t!==id);});document.querySelectorAll("#tabs .pairchip").forEach(function(b){b.classList.toggle("on",b.dataset.t===id);});}
+document.querySelectorAll("#tabs [data-t]").forEach(function(b){b.onclick=function(){tab(b.dataset.t);};});
+var qt=new URLSearchParams(location.search).get("tab");if(qt==="payout")tab("tPay");
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=160/Math.max(im.width,im.height),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",0.75));};im.onerror=function(){cb(null);};im.src=r.result;};r.readAsDataURL(file);}
+$("pic").onchange=function(){if(this.files[0])shrink(this.files[0],function(u){if(u){pic=u;$("myPic").src=u;}});};
+$("rmPic").onclick=function(){API.post("/profile",{remove_avatar:true}).then(function(){$("myPic").removeAttribute("src");pic=null;});};
+function loadProfile(){API.get("/profile").then(function(r){if(!r||!r.ok)return;var p=r.profile;$("myName").textContent=p.display||p.name;$("myMail").textContent=p.email;if(p.avatar)$("myPic").src=p.avatar;$("disp").value=p.display||p.name;$("bio").value=p.bio||"";$("pledge").value=p.pledge||"";$("langs").value=p.langs||"";$("ctry").value=p.country||"NG";
+  var l={verified:"✓ Verified — your account is fully active.",review:"Your face check is under review. We'll notify you when it's approved.",none:"You haven't completed the face check yet. It's required to trade."}[p.live]||"";$("liveNote").textContent=l;if(p.live!=="verified")Liveness.start($("liveHost"),function(){loadProfile();});});}
+TREX.COUNTRIES.forEach(function(c){var o=document.createElement("option");o.value=c.code;o.textContent=c.flag+" "+c.name;$("ctry").appendChild(o);});
+$("saveP").onclick=function(){var b={display:$("disp").value.trim(),bio:$("bio").value,pledge:$("pledge").value,langs:$("langs").value,country:$("ctry").value};if(pic)b.avatar=pic;
+  API.post("/profile",b).then(function(r){$("pErr").style.color=r&&r.ok?"#027A48":"";$("pErr").textContent=r&&r.ok?"Saved ✓":(r&&r.error)||"Couldn't save.";if(r&&r.ok)loadProfile();});};
+API.get("/banks").then(function(b){$("payBank").innerHTML="<option value=''>Choose your bank</option>"+(b.banks||[]).map(function(x){return "<option value='"+esc(x.code)+"'>"+esc(x.name)+"</option>";}).join("");});
+function loadWallet(){API.get("/bond/me").then(function(m){if(m&&m.ok){$("wFree").textContent=TREX.fmt(m.available,"NGN");if(m.bank)$("payLog").textContent="Saved ✓ "+m.bank.account_name+" • "+(m.bank.bank_name||"")+" •••"+m.bank.last4;}});}
+$("paySave").onclick=function(){API.post("/bond/account",{account_number:$("payNo").value,bank_code:$("payBank").value}).then(function(r){$("payLog").textContent=r.ok?("Saved ✓ "+r.bank.account_name+" • "+(r.bank.bank_name||"")+" •••"+r.bank.last4):(r.error||"Couldn't save.");});};
+$("wGo").onclick=function(){API.post("/bond/withdraw",{amount:Number($("wAmt").value)||0},API.key()).then(function(r){$("wLog").textContent=!r.ok?(r.error||"Couldn't withdraw."):r.status==="pending"?"Withdrawal sent to your bank ✓":r.status==="pending_approval"?"Large amount — waiting for a second team approval.":"Couldn't send just now — the money stays in your balance.";loadWallet();});};
+$("pwSend").onclick=function(){API.post("/reset/request",{email:TREXAPP.me().email}).then(function(r){if(r&&r.ok){$("pwBox").classList.remove("hidden");$("pwErr").style.color="#027A48";$("pwErr").textContent="Code sent to your email.";}else{$("pwErr").style.color="";$("pwErr").textContent=(r&&r.error)||"Couldn't send the code.";}});};
+$("pwGo").onclick=function(){API.post("/reset/confirm",{email:TREXAPP.me().email,code:$("pwCode").value.trim(),password:$("pwNew").value}).then(function(r){if(r&&r.ok){alert("Password changed. Please sign in again.");API.signOut(false);}else{$("pwErr").style.color="";$("pwErr").textContent=(r&&r.error)||"Couldn't change the password.";}});};
+$("out1").onclick=function(){API.signOut(false);};$("out2").onclick=function(){if(confirm("Sign out on every device?"))API.signOut(true);};
+function loadTickets(){API.get("/tickets").then(function(r){$("supList").innerHTML=(r&&r.tickets&&r.tickets.length)?r.tickets.map(function(t){return "<div class='row'><b>"+esc(t.cat)+":</b> "+esc(t.title)+" <span class='badge "+(t.status==="closed"?"b-green":"b-blue")+"'>"+esc(t.status)+"</span></div>";}).join(""):"<p class='muted'>No tickets yet.</p>";});}
+$("supGo").onclick=function(){if(!$("supMsg").value.trim()){alert("Describe the issue first.");return;}API.post("/tickets",{cat:$("supCat").value,title:$("supMsg").value}).then(function(){$("supMsg").value="";loadTickets();});};
+TREXAPP.ready(function(){loadProfile();loadWallet();loadTickets();});
 </script>
 </body>
 </html>
