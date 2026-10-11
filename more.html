@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Trex — More</title>
 <link rel="stylesheet" href="css/app.css" />
 <script src="js/api.js"></script><script src="js/app.js"></script>
 <style>.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;border-bottom:1px solid var(--line);font-size:15px}.item:last-child{border-bottom:0}.item a{color:var(--blue);font-weight:700;text-decoration:none}</style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2A0A54">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trex">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>body{padding-top:env(safe-area-inset-top);-webkit-tap-highlight-color:transparent}.bottomnav,.cta{padding-bottom:env(safe-area-inset-bottom)}</style>
+<script src="/js/pwa.js" defer></script>
 </head>
 <body>
 <div class="wrap" style="max-width:640px">
   <div class="nav"><b>TREX</b><a href="dashboard.html">Home</a></div>
   <div class="top"><h2 style="margin:0 0 6px">More</h2><div class="muted">Everything you can do in Trex.</div></div>
+  <div class="card" data-install><b>📲 Install Trex</b><p class="muted">Add Trex to your home screen for a full-screen app with instant alerts.</p><button class="btn btn-blue" data-install>Install app</button></div>
   <div id="menu"></div>
   <button class="btn btn-line" id="out">Sign out</button>
 </div>

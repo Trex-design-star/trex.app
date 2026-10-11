@@ -31,3 +31,5 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
 .avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#EDE9DE;display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted);flex:0 0 auto}
 .otp{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.otp input{text-align:center;font-size:20px;font-weight:800;padding:10px 4px}
 .mask{letter-spacing:.15em}
+
+html{overscroll-behavior-y:contain}body{-webkit-text-size-adjust:100%}@media (display-mode:standalone){.wrap{padding-top:8px}}

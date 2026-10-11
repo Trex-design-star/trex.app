@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Trex — Create account</title>
 <link rel="stylesheet" href="css/app.css" />
 <script src="js/trex.js"></script><script src="js/api.js"></script><script src="js/liveness.js"></script>
 <style>.step-dot{display:inline-block;width:26px;height:26px;border-radius:50%;background:#E4E0D6;color:#4B5563;text-align:center;line-height:26px;font-weight:800;font-size:13px;margin-right:4px}.step-dot.on{background:var(--blue);color:#fff}.step-dot.done{background:var(--black);color:#fff}</style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2A0A54">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trex">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>body{padding-top:env(safe-area-inset-top);-webkit-tap-highlight-color:transparent}.bottomnav,.cta{padding-bottom:env(safe-area-inset-bottom)}</style>
+<script src="/js/pwa.js" defer></script>
 </head>
 <body>
 <div class="wrap" style="max-width:560px">
-  <div class="nav"><b>TREX</b><a href="index.html">Home</a></div>
+  <div class="nav"><b>TREX</b><span><a href="#" data-install>📲 Install app</a><a href="index.html" style="margin-left:12px">Home</a></span></div>
   <div class="top"><h2 style="margin:0 0 6px">Create your account</h2><div class="muted">One account for every currency you trade.</div></div>
   <a class="btn btn-line" href="signin.html" style="margin:12px 0">Already have an account? Sign in →</a>
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Trex — Vendor dashboard</title>
 <script src="js/trex.js"></script>
 <script src="js/api.js"></script>
@@ -34,6 +34,13 @@
   .bottomnav a{flex:1;text-align:center;padding:12px 4px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none}
   .bottomnav a.on{color:var(--blue)}
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2A0A54">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trex">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>body{padding-top:env(safe-area-inset-top);-webkit-tap-highlight-color:transparent}.bottomnav,.cta{padding-bottom:env(safe-area-inset-bottom)}</style>
+<script src="/js/pwa.js" defer></script>
 </head>
 <body data-role="vendor">
 <div class="wrap">
