@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.application'
+}
+
+def siteUrl = (project.findProperty('SITE_URL') ?: System.getenv('SITE_URL') ?: '').toString().trim()
+while (siteUrl.endsWith('/')) { siteUrl = siteUrl.substring(0, siteUrl.length() - 1) }
+if (!siteUrl.startsWith('https://')) {
+    throw new GradleException("SITE_URL must be your https site address, e.g. https://yoursite.netlify.app")
+}
+def siteHost = new URI(siteUrl).host
+def vCode = (System.getenv('VERSION_CODE') ?: '1').toInteger()
+
+android {
+    namespace 'app.trex.android'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'app.trex.android'
+        minSdk 24
+        targetSdk 34
+        versionCode vCode
+        versionName "1.0.${vCode}"
+        buildConfigField 'String', 'SITE_URL', "\"${siteUrl}\""
+        manifestPlaceholders = [siteHost: siteHost]
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('KEYSTORE_PATH')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias 'trex'
+                keyPassword System.getenv('KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
