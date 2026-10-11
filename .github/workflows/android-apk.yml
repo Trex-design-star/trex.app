@@ -1,0 +1,74 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: "Your live Trex address, for example https://yoursite.netlify.app"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up the Android tools
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Load the signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then echo "::error::The secret ANDROID_KEYSTORE_B64 is missing. Add it in Settings > Secrets and variables > Actions."; exit 1; fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/trex-release.jks"
+          test -s "$RUNNER_TEMP/trex-release.jks"
+
+      - name: Build the signed APK
+        working-directory: android
+        env:
+          SITE_URL: ${{ inputs.site_url }}
+          KEYSTORE_PATH: ${{ runner.temp }}/trex-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: gradle --no-daemon assembleRelease
+
+      - name: Verify the APK is real and correctly signed
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          test -s "$APK"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "== signature =="; "$BT/apksigner" verify --verbose --print-certs "$APK" | tee verify.txt
+          grep -q "Verified using v2 scheme (APK Signature Scheme v2): true" verify.txt
+          echo "== contents =="; "$BT/aapt2" dump badging "$APK" | grep -E "^package:|sdkVersion|targetSdkVersion|uses-permission|launchable-activity"
+          cp "$APK" trex.apk
+          ls -la trex.apk
+
+      - name: Keep the APK as a download
+        uses: actions/upload-artifact@v4
+        with:
+          name: trex-apk
+          path: trex.apk
+
+      - name: Publish a download page you can open on your phone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-build-${{ github.run_number }}" trex.apk \
+            --title "Trex Android app (build ${{ github.run_number }})" \
+            --notes "Open this page on your Android phone, tap trex.apk to download and install. Site: ${{ inputs.site_url }}"
