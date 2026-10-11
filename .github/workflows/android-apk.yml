@@ -23,8 +23,29 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up the Android tools
-        uses: android-actions/setup-android@v3
+      - name: Prepare the Android tools
+        run: |
+          set +e
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "Android SDK folder: $SDK"
+          export ANDROID_HOME="$SDK" ANDROID_SDK_ROOT="$SDK"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          SDKM=$(ls "$SDK"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          if [ -z "$SDKM" ]; then
+            echo "sdkmanager not found, downloading the official command-line tools"
+            mkdir -p "$SDK/cmdline-tools"
+            curl -fsSL -o "$RUNNER_TEMP/cmdtools.zip" https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip || { echo "::error::Could not download the Android command-line tools"; exit 1; }
+            unzip -q "$RUNNER_TEMP/cmdtools.zip" -d "$SDK/cmdline-tools"
+            rm -rf "$SDK/cmdline-tools/latest"
+            mv "$SDK/cmdline-tools/cmdline-tools" "$SDK/cmdline-tools/latest"
+            SDKM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          yes | "$SDKM" --licenses > /dev/null 2>&1
+          "$SDKM" "platforms;android-34" "build-tools;34.0.0" 2>&1 | tail -5
+          test -d "$SDK/platforms/android-34" || { echo "::error::Android platform 34 is not installed"; exit 1; }
+          test -x "$SDK/build-tools/34.0.0/apksigner" || { echo "::error::Android build-tools 34.0.0 are not installed"; exit 1; }
+          echo "Android tools ready"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -52,7 +73,7 @@ jobs:
         run: |
           APK=android/app/build/outputs/apk/release/app-release.apk
           test -s "$APK"
-          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          BT="$ANDROID_HOME/build-tools/34.0.0"
           echo "== signature =="; "$BT/apksigner" verify --verbose --print-certs "$APK" | tee verify.txt
           grep -q "Verified using v2 scheme (APK Signature Scheme v2): true" verify.txt
           echo "== contents =="; "$BT/aapt2" dump badging "$APK" | grep -E "^package:|sdkVersion|targetSdkVersion|uses-permission|launchable-activity"
