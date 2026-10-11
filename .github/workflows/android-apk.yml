@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   workflow_dispatch:
     inputs:
-      site_url:
+      site_url: https://trex-app.netlify.app
         description: "Your live Trex address, for example https://yoursite.netlify.app"
         required: true
 
