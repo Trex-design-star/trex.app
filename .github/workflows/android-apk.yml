@@ -3,9 +3,10 @@ name: Build Android APK
 on:
   workflow_dispatch:
     inputs:
-      site_url: https://trex-app.netlify.app
-        description: "Your live Trex address, for example https://yoursite.netlify.app"
-        required: true
+      site_url:
+        description: "Your live Trex address, for example https://yoursite.netlify.app (leave empty to use the saved SITE_URL variable)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -13,6 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Get the code
         uses: actions/checkout@v4
@@ -23,29 +25,26 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Prepare the Android tools
+      - name: Check the site address
+        env:
+          SITE_URL: ${{ inputs.site_url || vars.SITE_URL }}
         run: |
-          set +e
-          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
-          echo "Android SDK folder: $SDK"
-          export ANDROID_HOME="$SDK" ANDROID_SDK_ROOT="$SDK"
-          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
-          SDKM=$(ls "$SDK"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
-          if [ -z "$SDKM" ]; then
-            echo "sdkmanager not found, downloading the official command-line tools"
-            mkdir -p "$SDK/cmdline-tools"
-            curl -fsSL -o "$RUNNER_TEMP/cmdtools.zip" https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip || { echo "::error::Could not download the Android command-line tools"; exit 1; }
-            unzip -q "$RUNNER_TEMP/cmdtools.zip" -d "$SDK/cmdline-tools"
-            rm -rf "$SDK/cmdline-tools/latest"
-            mv "$SDK/cmdline-tools/cmdline-tools" "$SDK/cmdline-tools/latest"
-            SDKM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          echo "Site address: [$SITE_URL]"
+          if [ -z "$SITE_URL" ]; then echo "::error::No site address. When you click Run workflow, type your Netlify address (like https://yoursite.netlify.app) in the box."; exit 1; fi
+          case "$SITE_URL" in https://*) ;; *) echo "::error::The address must start with https://"; exit 1;; esac
+          case "$SITE_URL" in *github.io*) echo "::error::That is a GitHub Pages address. Use your Netlify address instead, because only Netlify runs the Trex server."; exit 1;; esac
+
+      - name: Prepare the Android tools (already installed on GitHub's computers)
+        run: |
+          echo "Android SDK folder: $ANDROID_HOME"
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$SDKM" ]; then
+            yes | "$SDKM" --licenses > /dev/null || true
+            "$SDKM" "platforms;android-34" "build-tools;34.0.0" > /dev/null || true
+          else
+            echo "::warning::sdkmanager not found, Gradle will fetch what it needs"
           fi
-          yes | "$SDKM" --licenses > /dev/null 2>&1
-          "$SDKM" "platforms;android-34" "build-tools;34.0.0" 2>&1 | tail -5
-          test -d "$SDK/platforms/android-34" || { echo "::error::Android platform 34 is not installed"; exit 1; }
-          test -x "$SDK/build-tools/34.0.0/apksigner" || { echo "::error::Android build-tools 34.0.0 are not installed"; exit 1; }
-          echo "Android tools ready"
+          ls "$ANDROID_HOME/build-tools" || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -63,7 +62,7 @@ jobs:
       - name: Build the signed APK
         working-directory: android
         env:
-          SITE_URL: ${{ inputs.site_url }}
+          SITE_URL: ${{ inputs.site_url || vars.SITE_URL }}
           KEYSTORE_PATH: ${{ runner.temp }}/trex-release.jks
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           VERSION_CODE: ${{ github.run_number }}
@@ -73,7 +72,8 @@ jobs:
         run: |
           APK=android/app/build/outputs/apk/release/app-release.apk
           test -s "$APK"
-          BT="$ANDROID_HOME/build-tools/34.0.0"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "Using build tools: $BT"
           echo "== signature =="; "$BT/apksigner" verify --verbose --print-certs "$APK" | tee verify.txt
           grep -q "Verified using v2 scheme (APK Signature Scheme v2): true" verify.txt
           echo "== contents =="; "$BT/aapt2" dump badging "$APK" | grep -E "^package:|sdkVersion|targetSdkVersion|uses-permission|launchable-activity"
@@ -92,4 +92,4 @@ jobs:
         run: |
           gh release create "android-build-${{ github.run_number }}" trex.apk \
             --title "Trex Android app (build ${{ github.run_number }})" \
-            --notes "Open this page on your Android phone, tap trex.apk to download and install. Site: ${{ inputs.site_url }}"
+            --notes "Open this page on your Android phone, tap trex.apk to download and install. Site: ${{ inputs.site_url || vars.SITE_URL }}"
